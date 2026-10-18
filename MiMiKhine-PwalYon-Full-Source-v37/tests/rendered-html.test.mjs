@@ -636,6 +636,32 @@ test("ships a role-gated immutable opening-balance migration", async () => {
   );
 });
 
+test("ships a separate historical cash/goods advance import without current ledger movements", async () => {
+  const source = await readFile(
+    new URL("../outputs/pwal-yon-dashboard.html", import.meta.url),
+    "utf8",
+  );
+  const migration = await readFile(
+    new URL(
+      "../supabase/migrations/202610180001_historical_farmer_advances.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(source, /value="FARMER_ADVANCE"/);
+  assert.match(source, /commit_historical_advance_import/);
+  assert.match(source, /ယနေ့ Cash Book နှင့် Stock ကို မပြောင်းဘဲ/);
+  assert.match(source, /advance_type,product_id,location_id,quantity,unit_price_kyat,principal_kyat/);
+  assert.match(migration, /create or replace function public\.commit_historical_advance_import/i);
+  assert.match(migration, /entry_type = 'FARMER_ADVANCE'/i);
+  assert.match(migration, /advance_type = 'GOODS'/i);
+  assert.match(migration, /opening_date cannot be after the server business date/i);
+  assert.match(migration, /grant execute on function public\.commit_historical_advance_import[\s\S]*to authenticated/i);
+  assert.doesNotMatch(migration, /insert into public\.cash_ledger_entries/i);
+  assert.doesNotMatch(migration, /insert into public\.product_stock_movements/i);
+});
+
 test("keeps the standalone output and deployed worker in sync", async () => {
   const source = await readFile(
     new URL("../outputs/pwal-yon-dashboard.html", import.meta.url),

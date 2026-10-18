@@ -93,6 +93,9 @@ before(async()=>{
   await db.exec('reset role');
   await db.exec(finance);
   await db.exec(finance);
+  const historical=await migration('202610180001_historical_farmer_advances.sql');
+  await db.exec(historical);
+  await db.exec(historical);
   await asOwner();
 });
 
@@ -118,6 +121,70 @@ test('opening farmer debt is backfilled once and future imports create repayable
   assert.equal((await one("select count(*)::int n from public.advance_lots where opening_balance_entry_id is not null and customer_id='F-014'")).n,1);
   const balances=(await db.query('select * from public.get_farmer_debt_balances()')).rows;
   assert.equal(Number(balances.find(row=>row.customer_id==='F-014').remaining_principal_kyat),90000);
+});
+
+test('historical cash and goods advances preserve old dates without current cash or stock movement',async()=>{
+  await setBusinessDate('2026-07-01');
+  const before=await one(`select
+    (select count(*) from public.cash_ledger_entries)::int cash,
+    (select count(*) from public.product_stock_movements)::int stock,
+    (select quantity from public.get_product_stock_balances()
+      where product_id='P-002' and location_id='WH-001') quantity`);
+  const request=randomUUID();
+  const rows=[
+    {customer_id:'F-001',opening_date:'2026-06-12',advance_type:'CASH',principal_kyat:'100000',monthly_rate:'3',notes:'old cash'},
+    {customer_id:'F-001',opening_date:'2026-06-06',advance_type:'GOODS',product_id:'P-002',location_id:'WH-001',quantity:'2',unit_price_kyat:'72000',monthly_rate:'3',notes:'old fertilizer'}
+  ];
+  const first=await one('select * from public.commit_historical_advance_import($1,$2,$3::jsonb,$4)',[request,'legacy-ledger.csv',JSON.stringify(rows),'verified']);
+  assert.equal(first.import_type,'FARMER_ADVANCE');
+  assert.equal(first.row_count,2);
+  assert.equal(Number(first.total_quantity),2);
+  assert.equal(Number(first.total_principal_kyat),244000);
+  assert.equal(first.idempotent,false);
+  const retry=await one('select * from public.commit_historical_advance_import($1,$2,$3::jsonb,$4)',[request,'changed.csv','[]',null]);
+  assert.equal(retry.import_id,first.import_id);
+  assert.equal(retry.idempotent,true);
+
+  const lots=(await db.query("select * from public.advance_lots where notes like 'Historical Advance%' order by issued_date,advance_type")).rows;
+  assert.equal(lots.length,2);
+  const goods=lots.find(row=>row.advance_type==='GOODS'),cash=lots.find(row=>row.advance_type==='CASH');
+  assert.equal(isoDate(cash.issued_date),'2026-06-12');
+  assert.equal(Number(cash.original_principal_kyat),100000);
+  assert.equal(isoDate(goods.issued_date),'2026-06-06');
+  assert.equal(goods.product_id,'P-002');
+  assert.equal(goods.location_id,'WH-001');
+  assert.equal(Number(goods.original_quantity),2);
+  assert.equal(Number(goods.unit_price_kyat),72000);
+  assert.equal(Number(goods.original_principal_kyat),144000);
+
+  const after=await one(`select
+    (select count(*) from public.cash_ledger_entries)::int cash,
+    (select count(*) from public.product_stock_movements)::int stock,
+    (select quantity from public.get_product_stock_balances()
+      where product_id='P-002' and location_id='WH-001') quantity`);
+  assert.deepEqual(after,before);
+
+  await setBusinessDate('2026-07-23');
+  const payment=await repay({lot:goods.id,quantity:1});
+  assert.equal(Number(payment.elapsed_days),47);
+  assert.equal(Number(payment.half_month_steps),4);
+  assert.equal(Number(payment.principal_kyat),72000);
+  assert.equal(Number(payment.interest_kyat),4320);
+});
+
+test('historical advance import rejects future dates, malformed rows and direct writes atomically',async()=>{
+  await setBusinessDate('2026-07-01');
+  const count=await one("select count(*)::int n from public.opening_balance_imports where import_type='FARMER_ADVANCE'");
+  await assert.rejects(one('select * from public.commit_historical_advance_import($1,$2,$3::jsonb,$4)',[
+    randomUUID(),'bad.csv',JSON.stringify([
+      {customer_id:'F-001',opening_date:'2026-06-01',advance_type:'CASH',principal_kyat:'10000',monthly_rate:'3'},
+      {customer_id:'F-001',opening_date:'2026-07-02',advance_type:'GOODS',product_id:'P-002',location_id:'WH-001',quantity:'1',unit_price_kyat:'72000',monthly_rate:'3'}
+    ]),null
+  ]),/cannot be after/i);
+  assert.deepEqual(await one("select count(*)::int n from public.opening_balance_imports where import_type='FARMER_ADVANCE'"),count);
+  await db.exec('set role authenticated');
+  await assert.rejects(db.query("insert into public.opening_balance_entries(import_id,line_no,entry_type) values(gen_random_uuid(),1,'FARMER_ADVANCE')"),/permission denied/i);
+  await asOwner();
 });
 
 test('cash advance uses server date and number, is idempotent, and rejects a changed retry',async()=>{

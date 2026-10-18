@@ -181,6 +181,26 @@ supabaseClient
 
 `onPostgresChanges` is not a standalone JavaScript method.
 
+## Enter old farmer advances safely
+
+Run `supabase/migrations/202610180001_historical_farmer_advances.sql` after the
+earlier migrations. In the dashboard, open **Master Data → Opening Balance
+Import** and choose **အရင်စိုက်ထုတ်စာရင်း (ငွေ/ပစ္စည်း)**. Download the CSV
+template, enter the original issue date, and preview every row before commit.
+
+- `CASH` rows use `principal_kyat`; leave product, location, quantity, and unit
+  price empty.
+- `GOODS` rows use `product_id`, `location_id`, `quantity`, and
+  `unit_price_kyat`; leave `principal_kyat` empty because the server calculates
+  it as quantity × issue-time unit price.
+- `opening_date` may be an earlier date but cannot be after the server business
+  date.
+- A historical import creates an immutable, partially repayable advance lot and
+  starts interest from the original date. It intentionally does **not** create
+  a cash-book entry or reduce today's product stock.
+- New advances still use the normal advance form and remain locked to the
+  current server business date.
+
 ## Login and database messages
 
 - **Email သို့မဟုတ် Password မမှန်ပါ** — wrong credentials or the Auth user does not exist.
