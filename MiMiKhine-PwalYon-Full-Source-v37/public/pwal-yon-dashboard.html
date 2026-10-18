@@ -1667,23 +1667,48 @@ document.addEventListener('submit',event=>{if(event.target.matches?.('[data-pilo
 document.querySelectorAll('[data-save]').forEach(x=>x.onclick=showToast);
 let initialToday=todayIso();advanceDate.value=initialToday;advanceDate.min=initialToday;advanceDate.max=initialToday;repayDate.value=initialToday;repayDate.min=initialToday;repayDate.max=initialToday;applyProductDefaults();syncInputSaleProducts(true);syncInputSaleReference();loan();initializeConsignmentUi();renderBags();renderOperations();applyPilotWriteGuards();initializeMarketPriceModule().catch(error=>{setMarketValidation('PC Local ဈေးနှုန်းမှတ်တမ်း ဖွင့်မရပါ · '+String(error?.message||error));console.error('Market price initialization failed',error)});initializeWeighingOfflineQueue().then(()=>initializeSupabaseIntegration()).catch(error=>{setSupabaseState('ERROR',supabaseFriendlyError(error));console.error('Weighing/Supabase initialization failed',error)});
 
+// function deleteCustomer(customerId) {
+//   if (confirm("ဒီတောင်သူစာရင်းကို အမှန်တကယ် ဖျက်မှာ သေချာပါသလား။")) {
+//     if (typeof supabase !== 'undefined') {
+//       supabase
+//         .from('farmers') // မိမိသုံးထားသော Database Table နာမည် (customers သို့မဟုတ် farmers)
+//         .delete()
+//         .eq('customer_id', customerId)
+//         .then(({ error }) => {
+//           if (error) {
+//             alert("ဖျက်ရာတွင် အမှား ရှိနေပါသည်: " + error.message);
+//           } else {
+//             alert("တောင်သူစာရင်းကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။");
+//             location.reload(); // စာရင်းဇယားကို Refresh လုပ်ပေးရန်
+//           }
+//         });
+//     } else {
+//       alert("Database ချိတ်ဆက်မှု မတွေ့ပါ။");
+//     }
+//   }
+// }
+
 function deleteCustomer(customerId) {
+  // ၁။ ID တကယ် ရ မရ စစ်ရန်
+  alert("ဖျက်မည့် တောင်သူ ID: " + customerId);
+
   if (confirm("ဒီတောင်သူစာရင်းကို အမှန်တကယ် ဖျက်မှာ သေချာပါသလား။")) {
     if (typeof supabase !== 'undefined') {
       supabase
-        .from('farmers') // မိမိသုံးထားသော Database Table နာမည် (customers သို့မဟုတ် farmers)
+        .from('farmers')
         .delete()
         .eq('customer_id', customerId)
-        .then(({ error }) => {
+        .then(({ data, error }) => {
           if (error) {
-            alert("ဖျက်ရာတွင် အမှား ရှိနေပါသည်: " + error.message);
+            console.error("Supabase Error:", error);
+            alert("Supabase Error တက်နေပါသည်: " + error.message);
           } else {
-            alert("တောင်သူစာရင်းကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။");
-            location.reload(); // စာရင်းဇယားကို Refresh လုပ်ပေးရန်
+            alert("ဖျက်ပြီးပါပြီ။");
+            location.reload();
           }
         });
     } else {
-      alert("Database ချိတ်ဆက်မှု မတွေ့ပါ။");
+      alert("Supabase Client ကို ရှာမတွေ့ပါ။ (undefined ဖြစ်နေပါသည်)");
     }
   }
 }
