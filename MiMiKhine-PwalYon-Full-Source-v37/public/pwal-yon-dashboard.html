@@ -429,8 +429,13 @@ active          BOOLEAN</code></div></div>
         <div class="panel-head"><div><h3>အရင်စိုက်ထုတ်အကြွေး တစ်ခုချင်းထည့်ရန်</h3><span class="master-muted">တောင်သူတစ်ယောက်၏ ငွေသား သို့မဟုတ် ကုန်ပစ္စည်းအကြွေးကို မူလထုတ်ပေးသည့်ရက်ဖြင့် မှတ်မည်</span></div><span class="pill" id="historicalAdvanceManualRoleBadge">Owner / Admin / Accountant</span></div>
         <div class="historical-manual-note"><b>ဤ Form ကိုပဲ ပုံမှန်သုံးပါ —</b> အရင်စာရင်းတစ်ခုစီကို ရိုက်သွင်းပြီး Server မှ OB Number ထုတ်ပေးမည်။ ယနေ့ Cash Book နှင့် ယနေ့ Stock ကို မပြောင်းဘဲ တောင်သူ၏ အကြွေး Lot နှင့် အတိုးစတင်ရက်ကိုသာ ဖန်တီးမည်။</div>
         <form id="historicalAdvanceManualForm" class="ops-form" novalidate>
-          <div class="field full"><label for="historicalAdvanceFarmer">တောင်သူ *</label><input id="historicalAdvanceFarmer" list="historicalAdvanceFarmerList" autocomplete="off" placeholder="Customer ID သို့မဟုတ် တောင်သူအမည် ရိုက်ရှာပါ"><datalist id="historicalAdvanceFarmerList"></datalist></div>
-          <div class="field"><label for="historicalAdvanceOpeningDate">မူလထုတ်ပေးသည့်ရက် *</label><input id="historicalAdvanceOpeningDate" type="text" maxlength="10" autocomplete="off" placeholder="ဥပမာ — 2026-06-12"><small class="historical-field-help">အင်္ဂလိပ်နှစ် YYYY-MM-DD ဖြင့်ထည့်ပါ · Thai/Buddhist ခုနှစ် မသုံးပါ</small></div>
+          <div class="field full">
+  <label for="historicalAdvanceFarmer">တောင်သူ *</label>
+  <select id="historicalAdvanceFarmer">
+    <option value="">— ရှိပြီးသားတောင်သူကို ရွေးပါ —</option>
+  </select>
+</div>         
+          <div class="field"><label for="historicalAdvanceOpeningDate">မူလထုတ်ပေးသည့်ရက် *</label><input id="historicalAdvanceOpeningDate" type="date"><small class="historical-field-help">မူလထုတ်ပေးခဲ့သည့်ရက်ကို Calendar မှ ရွေးပါ</small></div>
           <div class="field"><label for="historicalAdvanceType">စိုက်ထုတ်အမျိုးအစား *</label><select id="historicalAdvanceType"><option value="CASH">ငွေသားချေးယူမှု</option><option value="GOODS">ကုန်ပစ္စည်းယူမှု</option></select></div>
           <div class="historical-type-fields" id="historicalAdvanceCashFields"><div class="field"><label for="historicalAdvanceCashPrincipal">ယူထားသည့် အရင်းငွေ (ကျပ်) *</label><input id="historicalAdvanceCashPrincipal" type="number" min="1" step="1" inputmode="numeric" placeholder="ဥပမာ — 100000"></div></div>
           <div class="historical-type-fields hidden" id="historicalAdvanceGoodsFields">
@@ -1398,14 +1403,64 @@ masterEl('previewOpeningImport').onclick=()=>{try{masterAssertOnline(['owner','a
 masterEl('commitOpeningImport').onclick=()=>{let preview=openingPreviewState;if(!preview?.valid)return;let historical=preview.type==='FARMER_ADVANCE',warning=historical?'ယနေ့ Cash Book/Stock ကို မပြောင်းဘဲ အရင်အကြွေး Lot အဖြစ်':'Server Opening Balance အဖြစ်';if(!confirm(openingTypeLabel(preview.type)+' '+mm(preview.rows.length)+' ကြောင်းကို '+warning+' အတည်ပြုတင်မည်လား? Commit ပြီးလျှင် ဖျက်/ပြင်၍မရပါ။'))return;let button=masterEl('commitOpeningImport');masterWithSaving(button,async()=>{masterAssertOnline(['owner','admin','accountant']);let response=historical?await supabaseClient.rpc('commit_historical_advance_import',{p_request_id:preview.requestId,p_source_name:preview.sourceName,p_rows:preview.rows.map(row=>row.payload),p_notes:preview.notes||null}):await supabaseClient.rpc('commit_opening_balance_import',{p_request_id:preview.requestId,p_import_type:preview.type,p_source_name:preview.sourceName,p_rows:preview.rows.map(row=>row.payload),p_notes:preview.notes||null}),{data,error}=response;if(error)throw error;let result=Array.isArray(data)?data[0]:data,ref=result?.import_ref||'OB';openingPreviewState=null;masterEl('commitOpeningImport').disabled=true;await loadMasterData({quiet:true});if(historical&&financeOwnerReady())await loadFinanceData({quiet:true});masterMessage('✓ '+ref+' · '+mm(Number(result?.row_count||preview.rows.length))+' ကြောင်း Server တွင် Atomic Commit ပြီး'+(result?.idempotent?' · ထပ်မတင်ဘဲ မူလအဖြေပြန်ပေးသည်':''),'ok');toast.textContent='✓ '+openingTypeLabel(preview.type)+' '+ref+' သိမ်းပြီး';showToast()})};
 masterEl('refreshOpeningHistory').onclick=()=>loadMasterData().catch(()=>{});
 
-function historicalAdvanceFarmer(){let value=masterEl('historicalAdvanceFarmer')?.value.trim()||'',active=masterState.farmers.filter(row=>row.active);return active.find(row=>value===row.customer_id||value.startsWith(row.customer_id+' ·')||value===row.full_name)||null}
-function syncHistoricalAdvanceManualOptions(){
-  let farmerList=masterEl('historicalAdvanceFarmerList'),productSelect=masterEl('historicalAdvanceProduct'),locationSelect=masterEl('historicalAdvanceLocation');if(!farmerList||!productSelect||!locationSelect)return;
-  farmerList.innerHTML=masterState.farmers.filter(row=>row.active).map(row=>`<option value="${safeText(row.customer_id+' · '+row.full_name+(row.village?' — '+row.village:''))}"></option>`).join('');
-  let productValue=productSelect.value,locationValue=locationSelect.value;
-  productSelect.innerHTML='<option value="">— ကုန်ပစ္စည်းရွေးပါ —</option>'+masterState.products.filter(row=>row.active).map(row=>`<option value="${safeText(row.product_id)}">${safeText(row.product_id+' · '+row.name+' · '+row.unit_name)}</option>`).join('');
-  locationSelect.innerHTML='<option value="">— Stock Location ရွေးပါ —</option>'+masterState.locations.filter(row=>row.active).map(row=>`<option value="${safeText(row.location_id)}">${safeText(row.location_id+' · '+row.name)}</option>`).join('');
-  if([...productSelect.options].some(option=>option.value===productValue))productSelect.value=productValue;if([...locationSelect.options].some(option=>option.value===locationValue))locationSelect.value=locationValue;
+function historicalAdvanceFarmer(){
+  let customerId=masterEl('historicalAdvanceFarmer')?.value||'';
+  return masterState.farmers.find(
+    row=>row.active&&row.customer_id===customerId
+  )||null
+}
+  function syncHistoricalAdvanceManualOptions(){
+  let farmerSelect=masterEl('historicalAdvanceFarmer'),
+      productSelect=masterEl('historicalAdvanceProduct'),
+      locationSelect=masterEl('historicalAdvanceLocation');
+
+  if(!farmerSelect||!productSelect||!locationSelect)return;
+
+  let farmerValue=farmerSelect.value,
+      productValue=productSelect.value,
+      locationValue=locationSelect.value;
+
+  farmerSelect.innerHTML=
+    '<option value="">— ရှိပြီးသားတောင်သူကို ရွေးပါ —</option>'+
+    masterState.farmers
+      .filter(row=>row.active)
+      .map(row=>
+        `<option value="${safeText(row.customer_id)}">`+
+        `${safeText(row.customer_id+' · '+row.full_name+(row.village?' — '+row.village:''))}`+
+        `</option>`
+      ).join('');
+
+  productSelect.innerHTML=
+    '<option value="">— ကုန်ပစ္စည်းရွေးပါ —</option>'+
+    masterState.products
+      .filter(row=>row.active)
+      .map(row=>
+        `<option value="${safeText(row.product_id)}">`+
+        `${safeText(row.product_id+' · '+row.name+' · '+row.unit_name)}`+
+        `</option>`
+      ).join('');
+
+  locationSelect.innerHTML=
+    '<option value="">— Stock Location ရွေးပါ —</option>'+
+    masterState.locations
+      .filter(row=>row.active)
+      .map(row=>
+        `<option value="${safeText(row.location_id)}">`+
+        `${safeText(row.location_id+' · '+row.name)}`+
+        `</option>`
+      ).join('');
+
+  if([...farmerSelect.options].some(option=>option.value===farmerValue)){
+    farmerSelect.value=farmerValue;
+  }
+
+  if([...productSelect.options].some(option=>option.value===productValue)){
+    productSelect.value=productValue;
+  }
+
+  if([...locationSelect.options].some(option=>option.value===locationValue)){
+    locationSelect.value=locationValue;
+  }
 }
 function validateHistoricalAdvanceManual(){
   let errors=[],farmer=historicalAdvanceFarmer(),openingDate=masterEl('historicalAdvanceOpeningDate')?.value.trim()||'',type=masterEl('historicalAdvanceType')?.value||'CASH',rateText=masterAsciiDigits(masterEl('historicalAdvanceMonthlyRate')?.value||'').replace(/,/g,''),notes=masterEl('historicalAdvanceNote')?.value.trim()||'',payload={opening_date:openingDate,advance_type:type,monthly_rate:rateText,notes:notes||null},principal=0,product=null,location=null;
@@ -1440,8 +1495,22 @@ function historicalAdvanceRequestIntent(payload){
   if(historicalAdvanceMemoryIntent?.signature===signature)return historicalAdvanceMemoryIntent;let next={signature,requestId:createUuid()};historicalAdvanceMemoryIntent=next;try{localStorage.setItem(key,JSON.stringify(next))}catch(error){}return next;
 }
 function clearHistoricalAdvanceRequestIntent(requestId){let key=historicalAdvanceIntentKey();try{let saved=JSON.parse(localStorage.getItem(key)||'null');if(!requestId||saved?.requestId===requestId)localStorage.removeItem(key)}catch(error){}if(!requestId||historicalAdvanceMemoryIntent?.requestId===requestId)historicalAdvanceMemoryIntent=null}
-function resetHistoricalAdvanceManual(){let form=masterEl('historicalAdvanceManualForm');if(!form)return;form.reset();masterEl('historicalAdvanceOpeningDate').value=openBusinessDate;masterEl('historicalAdvanceMonthlyRate').value='3';historicalAdvanceManualAttempted=false;clearHistoricalAdvanceManualResult();renderHistoricalAdvanceManual()}
-function initializeHistoricalAdvanceManual(){
+function resetHistoricalAdvanceManual(){
+  let form=masterEl('historicalAdvanceManualForm');
+  if(!form)return;
+
+  form.reset();
+
+  let dateInput=masterEl('historicalAdvanceOpeningDate');
+  dateInput.max=openBusinessDate;
+  dateInput.value=openBusinessDate;
+
+  masterEl('historicalAdvanceMonthlyRate').value='3';
+
+  historicalAdvanceManualAttempted=false;
+  clearHistoricalAdvanceManualResult();
+  renderHistoricalAdvanceManual();
+}function initializeHistoricalAdvanceManual(){
   let form=masterEl('historicalAdvanceManualForm');if(!form||form.dataset.ready)return;form.dataset.ready='true';let csvPanel=masterEl('openingBalanceMasterPanel'),csvTitle=csvPanel?.querySelector('.panel-head h3'),csvSubtitle=csvPanel?.querySelector('.panel-head .master-muted');if(csvTitle)csvTitle.textContent='CSV အစုလိုက်တင်ရန် (စာရင်းများစွာရှိမှ)';if(csvSubtitle)csvSubtitle.textContent='တစ်ခုချင်းမဟုတ်ဘဲ စာရင်းအများကြီးကို တစ်ခါတည်းတင်လိုမှ သုံးပါ';
   form.addEventListener('input',renderHistoricalAdvanceManual);form.addEventListener('change',renderHistoricalAdvanceManual);masterEl('historicalAdvanceProduct').addEventListener('change',()=>{let product=masterState.products.find(row=>row.product_id===masterEl('historicalAdvanceProduct').value);masterEl('historicalAdvanceUnitPrice').value=product&&Number(product.default_unit_price_kyat)>0?String(Math.round(Number(product.default_unit_price_kyat))):'';renderHistoricalAdvanceManual()});masterEl('resetHistoricalAdvanceManual').onclick=resetHistoricalAdvanceManual;
   form.onsubmit=async event=>{
