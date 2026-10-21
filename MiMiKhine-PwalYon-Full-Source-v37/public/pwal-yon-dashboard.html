@@ -333,7 +333,7 @@ active          BOOLEAN</code></div></div>
 
       <div class="panel advance-ledger" id="advanceLedgerPanel">
         <div class="panel-head"><div><h3>စိုက်ထုတ်လက်ကျန် တစ်ကြိမ်ချင်း</h3><span style="font-size:11px;color:var(--muted)">မူလဈေးနှင့် မူလအတိုးနှုန်းကို နောက်မှမပြောင်းဘဲ သိမ်းထားသည်</span></div><span id="advanceLedgerCount" class="printer-status">၀ စာရင်း</span></div>
-        <div class="advance-table-wrap"><table><thead><tr><th>Advance ID</th><th>တောင်သူ</th><th>ထုတ်သည့်ရက်</th><th>အမျိုးအစား</th><th>မူလ</th><th>လက်ကျန်</th><th>လစဉ်နှုန်း</th><th>အခြေအနေ</th></tr></thead><tbody id="advanceLedgerBody"></tbody></table></div>
+        <div class="advance-table-wrap"><table><thead><tr><th>Advance ID</th><th>တောင်သူ</th><th>ထုတ်သည့်ရက်</th><th>အမျိုးအစား</th><th>မူလ</th><th>လက်ကျန်</th><th>လစဉ်နှုန်း</th><th>မှတ်ချက်</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ချက်</th></tr></thead><tbody id="advanceLedgerBody"></tbody></table></div>
         <div class="panel-head" style="margin-top:24px"><h3>နောက်ဆုံး ပြန်ဆပ်ထားမှု</h3><small style="color:var(--muted)">အရင်းနှင့် အတိုးကို သီးခြားပြထားသည်</small></div>
         <div class="advance-table-wrap"><table><thead><tr><th>RP / Offset Ref</th><th>ရက်</th><th>တောင်သူ</th><th>ရှင်းသည့်အရာ</th><th>အရင်း</th><th>အတိုး</th><th>လက်ခံ/ဖြတ်ငွေ</th><th>လက်ကျန်</th></tr></thead><tbody id="advanceRepaymentBody"><tr><td colspan="8" style="text-align:center;color:var(--muted)">ပြန်ဆပ်ထားမှု မရှိသေးပါ</td></tr></tbody></table></div>
       </div>
@@ -1158,7 +1158,145 @@ function syncRepaymentFarmers(){let current=repayAdvanceFarmer.value,farmerMap=n
 function syncRepaymentLots(){let customerId=(repayAdvanceFarmer.value||'').split('|')[0],lots=openAdvanceLots(customerId),current=repayAdvanceLot.value;repayAdvanceLot.innerHTML=lots.length?lots.map(lot=>`<option value="${safeText(lot.id)}">${safeText(lot.id+' · '+lot.issuedDate+' · '+lot.itemName+' · '+advanceLotDescription(lot))}</option>`).join(''):'<option value="">ဆပ်ရန် လက်ကျန်မရှိပါ</option>';repayAdvanceLot.disabled=!lots.length;if(lots.some(lot=>lot.id===current))repayAdvanceLot.value=current;let selected=repayAdvanceLot.value,changed=repayAdvanceLot.dataset.activeLot!==selected;prepareRepaymentLot(changed)}
 function prepareRepaymentLot(resetAmount=false){let lot=advanceLots.find(item=>item.id===repayAdvanceLot.value);repayAdvanceLot.dataset.activeLot=lot?.id||'';repayGoodsField.classList.toggle('hidden',!lot||lot.type!=='GOODS');repayCashField.classList.toggle('hidden',!lot||lot.type!=='CASH');repayDate.min=todayIso();if(lot){repayQty.min=lot.wholeUnits?'1':'0.001';repayQty.step=lot.wholeUnits?'1':'0.001'}if(lot&&resetAmount){if(lot.type==='GOODS')repayQty.value=String(Math.min(1,lot.remainingQty));else repayPrincipal.value=String(Math.min(100000,lot.remainingPrincipal))}repaymentCalculation()}
 function repaymentCalculation(){let lot=advanceLots.find(item=>item.id===repayAdvanceLot.value),paymentDate=repayDate.value,errors=[],days=0,selectedPrincipal=0,selectedQty=null,remainingPrincipal=0,remainingQty=null;if(!lot)errors.push('ရွေးထားသောတောင်သူတွင် ဆပ်ရန် စိုက်ထုတ်လက်ကျန်မရှိပါ');if(lot){let issueStamp=dateSerial(lot.issuedDate),paymentStamp=dateSerial(paymentDate),todayStamp=dateSerial(todayIso());if(!Number.isFinite(paymentStamp))errors.push('ဆပ်သည့်ရက်ကို ရွေးပါ');else{if(paymentStamp<issueStamp)errors.push('ဆပ်သည့်ရက်သည် ထုတ်ပေးသည့်ရက် မတိုင်မီ မဖြစ်ရပါ');if(paymentStamp!==todayStamp)errors.push('ငွေစာရင်းတင်သည့်ရက်ကို ယနေ့ Business Date ဖြင့်သာ ထည့်ပါ')}days=Number.isFinite(paymentStamp)?elapsedDays(lot.issuedDate,paymentDate):0;if(lot.type==='GOODS'){selectedQty=Number(repayQty.value);if(!Number.isFinite(selectedQty)||selectedQty<=0)errors.push('ယခုဆပ်မည့် ပစ္စည်းအရေအတွက်ကို သုညထက်ကြီးအောင် ထည့်ပါ');if(Number.isFinite(selectedQty)&&selectedQty>lot.remainingQty+0.0001)errors.push('ယခုဆပ်မည့်အရေအတွက်သည် လက်ကျန် '+mm(lot.remainingQty)+' '+lot.unit+' ထက် မကျော်ရပါ');let closesLot=Number.isFinite(selectedQty)&&Math.abs(selectedQty-lot.remainingQty)<=0.0001;selectedPrincipal=Number.isFinite(selectedQty)?(closesLot?lot.remainingPrincipal:Math.round(selectedQty*lot.unitPrice)):0;if(selectedPrincipal>lot.remainingPrincipal)errors.push('ရွေးထားသော ပစ္စည်းတန်ဖိုးသည် လက်ကျန်အရင်းထက် မကျော်ရပါ');remainingQty=Math.max(0,lot.remainingQty-(Number.isFinite(selectedQty)?selectedQty:0));remainingPrincipal=Math.max(0,lot.remainingPrincipal-selectedPrincipal)}else{selectedPrincipal=Math.round(Number(repayPrincipal.value));if(!Number.isFinite(selectedPrincipal)||selectedPrincipal<=0)errors.push('ယခုဆပ်မည့် အရင်းငွေကို သုညထက်ကြီးအောင် ထည့်ပါ');if(Number.isFinite(selectedPrincipal)&&selectedPrincipal>lot.remainingPrincipal)errors.push('ယခုဆပ်မည့်အရင်းသည် လက်ကျန်အရင်းထက် မကျော်ရပါ');remainingPrincipal=Math.max(0,lot.remainingPrincipal-(Number.isFinite(selectedPrincipal)?selectedPrincipal:0))}}selectedPrincipal=Math.max(0,selectedPrincipal||0);let halfMonthSteps=advanceInterestHalfMonthSteps(days),monthUnits=halfMonthSteps/2,interest=lot?simpleAdvanceInterest(selectedPrincipal,lot.monthlyRate,days):0,total=selectedPrincipal+interest;repayIssueOutput.textContent=lot?formatAdvanceDate(lot.issuedDate):'—';repayDaysOutput.textContent=mm(days)+' ရက် · '+advanceInterestPeriodLabel(days);repayPrincipalOutput.textContent=signedMoney(selectedPrincipal);repayInterestOutput.textContent=signedMoney(interest);repayTotalOutput.textContent=signedMoney(total);repayRemainingOutput.textContent=lot?(lot.type==='GOODS'?mm(Math.max(0,remainingQty))+' '+lot.unit+' / '+signedMoney(Math.max(0,remainingPrincipal)):signedMoney(Math.max(0,remainingPrincipal))):'—';repayValidation.style.display=errors.length?'block':'none';repayValidation.innerHTML=errors.map(error=>'• '+safeText(error)).join('<br>');let valid=Boolean(lot)&&errors.length===0&&selectedPrincipal>0;saveAdvanceRepayment.disabled=dayClosed||!valid||repaymentSaving;return{valid,lot,paymentDate,days,halfMonthSteps,monthUnits,selectedQty,selectedPrincipal,interest,total,remainingPrincipal,remainingQty,errors}}
-function renderAdvanceLedger(){let sorted=[...advanceLots].sort((a,b)=>b.issuedDate.localeCompare(a.issuedDate)||b.id.localeCompare(a.id)),openCount=sorted.filter(lot=>refreshAdvanceStatus(lot)!=='PAID').length;advanceLedgerCount.textContent=mm(openCount)+' လက်ကျန် / '+mm(sorted.length)+' စာရင်း';advanceLedgerBody.innerHTML=sorted.length?sorted.map(lot=>{let status=refreshAdvanceStatus(lot),statusLabel=status==='OPEN'?'ဖွင့်ထား':status==='PARTIAL'?'တစ်စိတ်တစ်ပိုင်းဆပ်ပြီး':'အပြီးဆပ်ပြီး',typeLabel=lot.type==='GOODS'?lot.itemName:'ငွေသား';return`<tr><td><b>${safeText(lot.id)}</b></td><td>${safeText(lot.farmerName)}</td><td>${formatAdvanceDate(lot.issuedDate)}</td><td>${safeText(typeLabel)}</td><td>${safeText(advanceLotDescription(lot,false))}</td><td>${safeText(advanceLotDescription(lot,true))}</td><td>${mm(lot.monthlyRate)}%</td><td><span class="advance-status ${status.toLowerCase()}">${statusLabel}</span></td></tr>`}).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted)">စိုက်ထုတ်စာရင်း မရှိသေးပါ</td></tr>'}
+function renderAdvanceLedger() {
+  let sorted = [...advanceLots].sort(
+    (a, b) =>
+      b.issuedDate.localeCompare(a.issuedDate) ||
+      b.id.localeCompare(a.id)
+  );
+
+  let openCount = sorted.filter(
+    lot => refreshAdvanceStatus(lot) !== 'PAID'
+  ).length;
+
+  advanceLedgerCount.textContent =
+    mm(openCount) + ' လက်ကျန် / ' +
+    mm(sorted.length) + ' စာရင်း';
+
+  advanceLedgerBody.innerHTML = sorted.length
+    ? sorted.map(lot => {
+        let status = refreshAdvanceStatus(lot);
+
+        let statusLabel =
+          status === 'OPEN'
+            ? 'ဖွင့်ထား'
+            : status === 'PARTIAL'
+              ? 'တစ်စိတ်တစ်ပိုင်းဆပ်ပြီး'
+              : 'အပြီးဆပ်ပြီး';
+
+        let typeLabel =
+          lot.type === 'GOODS'
+            ? lot.itemName
+            : 'ငွေသား';
+
+        let note = String(lot.note || '').trim();
+
+        return `
+          <tr>
+            <td><b>${safeText(lot.id)}</b></td>
+            <td>${safeText(lot.farmerName)}</td>
+            <td>${formatAdvanceDate(lot.issuedDate)}</td>
+            <td>${safeText(typeLabel)}</td>
+            <td>${safeText(advanceLotDescription(lot, false))}</td>
+            <td>${safeText(advanceLotDescription(lot, true))}</td>
+            <td>${mm(lot.monthlyRate)}%</td>
+            <td>${safeText(note || '—')}</td>
+            <td>
+              <span class="advance-status ${status.toLowerCase()}">
+                ${statusLabel}
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn"
+                type="button"
+                data-edit-advance-note="${safeText(lot.serverId)}"
+                style="padding:6px 10px"
+              >
+                မှတ်ချက်ပြင်ရန်
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('')
+    : `
+      <tr>
+        <td colspan="10" style="text-align:center;color:var(--muted)">
+          စိုက်ထုတ်စာရင်း မရှိသေးပါ
+        </td>
+      </tr>
+    `;
+}
+advanceLedgerBody.addEventListener('click', async event => {
+  let button = event.target.closest('[data-edit-advance-note]');
+  if (!button) return;
+
+  if (!financeWriteReady()) {
+    liveMessage(
+      'Owner Login ဝင်ပြီး Server Live ဖြစ်မှ မှတ်ချက်ပြင်နိုင်သည်'
+    );
+    return;
+  }
+
+  let lot = advanceLots.find(
+    item => item.serverId === button.dataset.editAdvanceNote
+  );
+
+  if (!lot) {
+    liveMessage('ပြင်မည့် အကြွေး Lot ကို မတွေ့ပါ');
+    return;
+  }
+
+  let edited = window.prompt(
+    lot.id + ' အတွက် မှတ်ချက်ပြင်ပါ',
+    lot.note || ''
+  );
+
+  if (edited === null) return;
+
+  let note = edited.trim();
+
+  if (note.length > 500) {
+    liveMessage('မှတ်ချက် စာလုံး ၅၀၀ ထက် မကျော်ရပါ');
+    return;
+  }
+
+  if (note === String(lot.note || '').trim()) {
+    liveMessage('မှတ်ချက် မပြောင်းလဲသေးပါ');
+    return;
+  }
+
+  if (!window.confirm(
+    lot.id + ' ရဲ့ မှတ်ချက်ကို ပြင်မည်လား?'
+  )) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'သိမ်းနေသည်…';
+
+  try {
+    await financeRpc(
+      'update_advance_lot_note',
+      {
+        p_advance_lot_id: lot.serverId,
+        p_notes: note || null
+      }
+    );
+
+    await financeReloadAfterWrite();
+
+    liveMessage(
+      '✓ ' + lot.id +
+      ' · မှတ်ချက်ပြင်ပြီး Audit Log တွင် မှတ်တမ်းတင်ပြီး'
+    );
+  } catch (error) {
+    liveMessage(financeFriendlyError(error));
+  } finally {
+    button.disabled = false;
+    button.textContent = 'မှတ်ချက်ပြင်ရန်';
+  }
+});
 function renderAdvanceRepayments(){advanceRepaymentBody.innerHTML=advanceRepayments.length?advanceRepayments.map(payment=>`<tr><td><b>${safeText(payment.id)}</b></td><td>${formatAdvanceDate(payment.paymentDate)}</td><td>${safeText(payment.farmerName)}</td><td>${safeText(payment.description)}</td><td>${signedMoney(payment.principal)}</td><td>${signedMoney(payment.interest)}</td><td>${signedMoney(payment.total)}</td><td>${safeText(payment.remainingDescription)}</td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted)">ပြန်ဆပ်ထားမှု မရှိသေးပါ</td></tr>'}
 function renderAdvanceModule(){if(!document.getElementById('advanceLedgerBody'))return;syncRepaymentFarmers();renderAdvanceLedger();renderAdvanceRepayments();loan();if(document.getElementById('consignmentSettlementPanel'))consignmentSettlementCalculation()}
 function quoteAdvancePrincipalFIFO(customerId,amount,paymentDate=todayIso()){let unallocated=Math.max(0,Math.round(amount||0)),allocations=[];for(let lot of openAdvanceLots(customerId)){if(!unallocated)break;let principal=Math.min(unallocated,lot.remainingPrincipal),quantity=lot.type==='GOODS'?(principal>=lot.remainingPrincipal?lot.remainingQty:Math.round(principal/lot.unitPrice*10000)/10000):null,days=elapsedDays(lot.issuedDate,paymentDate),halfMonthSteps=advanceInterestHalfMonthSteps(days),monthUnits=halfMonthSteps/2,interest=simpleAdvanceInterest(principal,lot.monthlyRate,days);allocations.push({lotId:lot.id,itemName:lot.itemName,type:lot.type,principal,quantity,unit:lot.unit,unitPrice:lot.unitPrice,days,halfMonthSteps,monthUnits,monthlyRate:lot.monthlyRate,interest,total:principal+interest});unallocated-=principal}let principal=allocations.reduce((sum,item)=>sum+item.principal,0),interest=allocations.reduce((sum,item)=>sum+item.interest,0);return{customerId,paymentDate,requested:Math.max(0,Math.round(amount||0)),allocations,principal,interest,total:principal+interest,unallocated}}
