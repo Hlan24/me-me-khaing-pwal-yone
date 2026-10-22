@@ -1190,7 +1190,14 @@ function renderAdvanceLedger() {
             : 'ငွေသား';
 
         let note = String(lot.note || '').trim();
+let hasRepayment = advanceRepayments.some(
+  payment => payment.advanceId === lot.id
+);
 
+let canFullEdit =
+  Boolean(lot.openingEntryId) &&
+  status === 'OPEN' &&
+  !hasRepayment;
         return `
           <tr>
             <td><b>${safeText(lot.id)}</b></td>
@@ -1207,15 +1214,25 @@ function renderAdvanceLedger() {
               </span>
             </td>
             <td>
-              <button
-                class="btn"
-                type="button"
-                data-edit-advance-note="${safeText(lot.serverId)}"
-                style="padding:6px 10px"
-              >
-                မှတ်ချက်ပြင်ရန်
-              </button>
-            </td>
+  ${
+    canFullEdit
+      ? `
+        <button
+          class="btn"
+          type="button"
+          data-edit-historical-advance="${safeText(lot.serverId)}"
+          style="padding:6px 10px"
+        >
+          ပြင်ရန်
+        </button>
+      `
+      : `
+        <span style="color:var(--muted)">
+          ပြင်မရ
+        </span>
+      `
+  }
+</td>
           </tr>
         `;
       }).join('')
