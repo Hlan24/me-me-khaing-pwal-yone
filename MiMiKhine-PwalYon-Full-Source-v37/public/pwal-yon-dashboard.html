@@ -446,11 +446,68 @@ active          BOOLEAN</code></div></div>
           </div>
           <div class="field"><label for="historicalAdvanceMonthlyRate">လစဉ် ရိုးရိုးအတိုးနှုန်း (%) *</label><input id="historicalAdvanceMonthlyRate" type="number" min="0" max="100" step="0.0001" inputmode="decimal" value="3"></div>
           <div class="field"><label for="historicalAdvanceNote">မှတ်ချက်</label><input id="historicalAdvanceNote" maxlength="500" placeholder="ဥပမာ — စာအုပ်ဟောင်းမှ ပြန်ထည့်ခြင်း"></div>
+       <div class="field full">
+  <button
+    class="btn"
+    id="addHistoricalAdvanceLine"
+    type="button"
+  >
+    ＋ ယခု Line ကို စာရင်းထဲထည့်ရန်
+  </button>
+</div>
         </form>
-        <div class="historical-manual-summary"><div><small>တောင်သူ</small><b id="historicalAdvanceFarmerSummary">မရွေးရသေး</b></div><div><small>အကြွေးစာရင်းတင် အရင်း</small><b id="historicalAdvancePrincipalSummary">ကျပ် ၀</b></div><div><small>စာရင်းအကျိုးသက်ရောက်မှု</small><b id="historicalAdvanceEffectSummary">ယနေ့ Cash / Stock မပြောင်း</b></div></div>
+        <div
+  id="historicalAdvanceDraftPanel"
+  class="master-table-wrap"
+  style="margin-top:14px"
+>
+  <table class="master-table">
+    <thead>
+      <tr>
+        <th>စဉ်</th>
+        <th>အမျိုးအစား</th>
+        <th>အကြောင်းအရာ</th>
+        <th>အရေအတွက်</th>
+        <th>Line အရင်း</th>
+        <th>လုပ်ဆောင်ချက်</th>
+      </tr>
+    </thead>
+
+    <tbody id="historicalAdvanceDraftBody">
+      <tr>
+        <td colspan="6" class="master-empty">
+          စာရင်းထဲ မထည့်ရသေးပါ
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+        <div class="historical-manual-summary">
+  <div>
+    <small>တောင်သူ</small>
+    <b id="historicalAdvanceFarmerSummary">မရွေးရသေး</b>
+  </div>
+
+  <div>
+    <small>Line အရေအတွက်</small>
+    <b id="historicalAdvanceDraftCount">၀ ကြောင်း</b>
+  </div>
+
+  <div>
+    <small>စုစုပေါင်းအကြွေးအရင်း</small>
+    <b id="historicalAdvancePrincipalSummary">ကျပ် ၀</b>
+  </div>
+
+  <div>
+    <small>စာရင်းအကျိုးသက်ရောက်မှု</small>
+    <b id="historicalAdvanceEffectSummary">
+      ယနေ့ Cash / Stock မပြောင်း
+    </b>
+  </div>
+</div>
         <div class="historical-manual-validation" id="historicalAdvanceValidation" role="alert" hidden></div>
         <div class="historical-manual-result" id="historicalAdvanceResult" role="status"></div>
-        <div class="historical-manual-actions"><button class="btn" id="resetHistoricalAdvanceManual" type="button">ရှင်းမည်</button><button class="btn primary" id="saveHistoricalAdvanceManual" type="submit" form="historicalAdvanceManualForm" disabled>✓ အကြွေး Lot တစ်ခု သိမ်းရန်</button></div>
+        <div class="historical-manual-actions"><button class="btn" id="resetHistoricalAdvanceManual" type="button">ရှင်းမည်</button><button class="btn primary" id="saveHistoricalAdvanceManual" type="submit" form="historicalAdvanceManualForm" disabled>✓ စာရင်းအားလုံး တစ်ခါတည်း သိမ်းရန်</button></div>
       </section>
     </section>
     <section class="view" id="modules"><div class="modules" id="moduleGrid"></div></section>
@@ -1463,6 +1520,8 @@ let historicalAdvanceManualSaving=false,
     historicalAdvanceManualAttempted=false,
     historicalAdvanceMemoryIntent=null,
     historicalAdvanceEditingLotId=null;
+  let historicalAdvanceDraftLines=[];
+let historicalAdvanceDraftEditingId=null;
   const HISTORICAL_ADVANCE_MANUAL_INTENT_KEY='pwalYonHistoricalAdvanceSingleIntent.v1';
 const masterEl=id=>document.getElementById(id);
 const masterRoleIn=roles=>Boolean(supabaseStaffMember?.active&&roles.includes(supabaseStaffMember.role));
@@ -1658,10 +1717,301 @@ function validateHistoricalAdvanceManual(){
 }
 function historicalAdvanceManualSetResult(message,tone='ok'){let box=masterEl('historicalAdvanceResult');if(!box)return;box.textContent=message;box.className='historical-manual-result show '+tone}
 function clearHistoricalAdvanceManualResult(){let box=masterEl('historicalAdvanceResult');if(!box)return;box.textContent='';box.className='historical-manual-result'}
-function renderHistoricalAdvanceManual(){
-  let form=masterEl('historicalAdvanceManualForm');if(!form)return;let goods=masterEl('historicalAdvanceType').value==='GOODS',check=validateHistoricalAdvanceManual(),canWrite=masterCanImport()&&activeStaffReady()&&navigator.onLine!==false;
-  masterEl('historicalAdvanceCashFields').classList.toggle('hidden',goods);masterEl('historicalAdvanceGoodsFields').classList.toggle('hidden',!goods);masterEl('historicalAdvanceFarmerSummary').textContent=check.farmer?check.farmer.customer_id+' · '+check.farmer.full_name:'မရွေးရသေး';masterEl('historicalAdvancePrincipalSummary').textContent=check.principal>0&&Number.isSafeInteger(check.principal)?signedMoney(check.principal):'ကျပ် ၀';masterEl('historicalAdvanceEffectSummary').textContent=goods?'အကြွေး Lot တိုး · ယနေ့ Stock မပြောင်း':'အကြွေး Lot တိုး · ယနေ့ Cash မပြောင်း';
-  let validation=masterEl('historicalAdvanceValidation');validation.hidden=!historicalAdvanceManualAttempted||check.errors.length===0;validation.innerHTML=check.errors.map(error=>'• '+safeText(error)).join('<br>');let badge=masterEl('historicalAdvanceManualRoleBadge');badge.className='pill '+(canWrite?'':'red');badge.textContent=canWrite?'SERVER · သိမ်းနိုင်':navigator.onLine===false?'OFFLINE · ဖတ်ရန်သာ':'Owner / Admin / Accountant';masterEl('saveHistoricalAdvanceManual').disabled=historicalAdvanceManualSaving||!canWrite||!check.valid;
+function historicalAdvanceLockHeader(locked){
+  [
+    'historicalAdvanceFarmer',
+    'historicalAdvanceOpeningDate',
+    'historicalAdvanceMonthlyRate',
+    'historicalAdvanceNote'
+  ].forEach(id=>{
+    let field=masterEl(id);
+    if(field)field.disabled=locked;
+  });
+}
+
+function clearHistoricalAdvanceLineEditor(){
+  historicalAdvanceDraftEditingId=null;
+
+  masterEl('historicalAdvanceCashPrincipal').value='';
+  masterEl('historicalAdvanceProduct').value='';
+  masterEl('historicalAdvanceLocation').value='';
+  masterEl('historicalAdvanceQuantity').value='';
+  masterEl('historicalAdvanceUnitPrice').value='';
+
+  let addButton=masterEl('addHistoricalAdvanceLine');
+
+  if(addButton){
+    addButton.textContent='＋ ယခု Line ကို စာရင်းထဲထည့်ရန်';
+  }
+
+  historicalAdvanceManualAttempted=false;
+}
+
+function renderHistoricalAdvanceDraft(){
+  let body=masterEl('historicalAdvanceDraftBody');
+
+  let total=historicalAdvanceDraftLines.reduce(
+    (sum,line)=>sum+Number(line.principal||0),
+    0
+  );
+
+  let count=masterEl('historicalAdvanceDraftCount');
+
+  if(count){
+    count.textContent=
+      mm(historicalAdvanceDraftLines.length)+' ကြောင်း';
+  }
+
+  if(!body)return total;
+
+  body.innerHTML=historicalAdvanceDraftLines.length
+    ? historicalAdvanceDraftLines.map((line,index)=>`
+        <tr>
+          <td>${mm(index+1)}</td>
+
+          <td>
+            ${safeText(
+              line.type==='CASH'
+                ? 'ငွေသား'
+                : 'ကုန်ပစ္စည်း'
+            )}
+          </td>
+
+          <td>
+            ${safeText(
+              line.type==='CASH'
+                ? 'ငွေသားချေးယူမှု'
+                : line.productName
+            )}
+          </td>
+
+          <td>
+            ${
+              line.type==='CASH'
+                ? '—'
+                : safeText(
+                    mm(Number(line.quantity))+
+                    ' '+
+                    line.unit
+                  )
+            }
+          </td>
+
+          <td>${signedMoney(line.principal)}</td>
+
+          <td>
+            <button
+              class="btn"
+              type="button"
+              data-edit-historical-draft="${safeText(line.id)}"
+              style="padding:5px 8px"
+            >
+              ပြင်ရန်
+            </button>
+
+            <button
+              class="btn"
+              type="button"
+              data-delete-historical-draft="${safeText(line.id)}"
+              style="padding:5px 8px"
+            >
+              ဖျက်ရန်
+            </button>
+          </td>
+        </tr>
+      `).join('')
+    : `
+      <tr>
+        <td colspan="6" class="master-empty">
+          စာရင်းထဲ မထည့်ရသေးပါ
+        </td>
+      </tr>
+    `;
+
+  return total;
+}
+
+function addHistoricalAdvanceDraftLine(){
+  if(historicalAdvanceEditingLotId)return;
+
+  historicalAdvanceManualAttempted=true;
+
+  let check=validateHistoricalAdvanceManual();
+
+  if(!check.valid){
+    renderHistoricalAdvanceManual();
+    return;
+  }
+
+  let line={
+    id:
+      historicalAdvanceDraftEditingId||
+      createUuid(),
+
+    payload:{
+      ...check.payload
+    },
+
+    type:check.payload.advance_type,
+    principal:Math.round(check.principal),
+
+    productName:
+      check.payload.advance_type==='GOODS'
+        ? check.product?.name||check.payload.product_id
+        : 'ငွေသား',
+
+    quantity:
+      check.payload.advance_type==='GOODS'
+        ? check.payload.quantity
+        : null,
+
+    unit:
+      check.payload.advance_type==='GOODS'
+        ? check.product?.unit_name||'ခု'
+        : 'ကျပ်',
+
+    unitPrice:
+      check.payload.advance_type==='GOODS'
+        ? check.payload.unit_price_kyat
+        : null
+  };
+
+  let existingIndex=
+    historicalAdvanceDraftLines.findIndex(
+      item=>item.id===line.id
+    );
+
+  if(existingIndex>=0){
+    historicalAdvanceDraftLines[existingIndex]=line;
+  }else{
+    historicalAdvanceDraftLines.push(line);
+  }
+
+  clearHistoricalAdvanceLineEditor();
+  renderHistoricalAdvanceManual();
+}
+ function renderHistoricalAdvanceManual(){
+  let form=masterEl('historicalAdvanceManualForm');
+
+  if(!form)return;
+
+  let goods=
+    masterEl('historicalAdvanceType').value==='GOODS';
+
+  let check=validateHistoricalAdvanceManual();
+
+  let canWrite=
+    masterCanImport()&&
+    activeStaffReady()&&
+    navigator.onLine!==false;
+
+  let editExisting=
+    Boolean(historicalAdvanceEditingLotId);
+
+  let draftTotal=
+    renderHistoricalAdvanceDraft();
+
+  historicalAdvanceLockHeader(
+    !editExisting&&historicalAdvanceDraftLines.length>0
+  );
+
+  masterEl('historicalAdvanceCashFields')
+    .classList.toggle('hidden',goods);
+
+  masterEl('historicalAdvanceGoodsFields')
+    .classList.toggle('hidden',!goods);
+
+  masterEl('historicalAdvanceFarmerSummary').textContent=
+    check.farmer
+      ? check.farmer.customer_id+
+        ' · '+
+        check.farmer.full_name
+      : 'မရွေးရသေး';
+
+  masterEl('historicalAdvancePrincipalSummary').textContent=
+    signedMoney(
+      editExisting
+        ? Math.max(0,Number(check.principal||0))
+        : draftTotal
+    );
+
+  masterEl('historicalAdvanceEffectSummary').textContent=
+    editExisting
+      ? (
+          goods
+            ? 'အကြွေး Lot ပြင်မည် · ယနေ့ Stock မပြောင်း'
+            : 'အကြွေး Lot ပြင်မည် · ယနေ့ Cash မပြောင်း'
+        )
+      : (
+          historicalAdvanceDraftLines.length
+            ? mm(historicalAdvanceDraftLines.length)+
+              ' Lot · ယနေ့ Cash / Stock မပြောင်း'
+            : 'ယနေ့ Cash / Stock မပြောင်း'
+        );
+
+  let validation=
+    masterEl('historicalAdvanceValidation');
+
+  validation.hidden=
+    !historicalAdvanceManualAttempted||
+    check.errors.length===0;
+
+  validation.innerHTML=
+    check.errors
+      .map(error=>'• '+safeText(error))
+      .join('<br>');
+
+  let badge=
+    masterEl('historicalAdvanceManualRoleBadge');
+
+  badge.className='pill '+(canWrite?'':'red');
+
+  badge.textContent=
+    canWrite
+      ? 'SERVER · သိမ်းနိုင်'
+      : navigator.onLine===false
+        ? 'OFFLINE · ဖတ်ရန်သာ'
+        : 'Owner / Admin / Accountant';
+
+  let addButton=
+    masterEl('addHistoricalAdvanceLine');
+
+  if(addButton){
+    addButton.hidden=editExisting;
+
+    addButton.disabled=
+      historicalAdvanceManualSaving||
+      !canWrite||
+      editExisting||
+      !check.valid;
+  }
+
+  let draftPanel=
+    masterEl('historicalAdvanceDraftPanel');
+
+  if(draftPanel){
+    draftPanel.hidden=editExisting;
+  }
+
+  let saveButton=
+    masterEl('saveHistoricalAdvanceManual');
+
+  saveButton.disabled=
+    historicalAdvanceManualSaving||
+    !canWrite||
+    (
+      editExisting
+        ? !check.valid
+        : historicalAdvanceDraftLines.length===0
+    );
+
+  if(!historicalAdvanceManualSaving){
+    saveButton.textContent=
+      editExisting
+        ? '✓ ပြင်ဆင်မှု သိမ်းရန်'
+        : '✓ စာရင်းအားလုံး တစ်ခါတည်း သိမ်းရန်';
+  }
+
   return check;
 }
 function historicalAdvanceIntentKey(){let host='project';try{host=new URL(storedSupabaseConfig().url).hostname.toLowerCase()}catch(error){}return HISTORICAL_ADVANCE_MANUAL_INTENT_KEY+':'+host+':'+String(supabaseSessionUser?.id||'anonymous')}
@@ -1675,7 +2025,9 @@ function resetHistoricalAdvanceManual() {
   if (!form) return;
 
   historicalAdvanceEditingLotId = null;
-
+historicalAdvanceDraftLines=[];
+historicalAdvanceDraftEditingId=null;
+historicalAdvanceLockHeader(false);
   form.reset();
 
   masterEl('historicalAdvanceOpeningDate').value = openBusinessDate;
@@ -1686,7 +2038,8 @@ function resetHistoricalAdvanceManual() {
   let saveButton = masterEl('saveHistoricalAdvanceManual');
 
   if (saveButton) {
-    saveButton.textContent = '✓ အကြွေး Lot တစ်ခု သိမ်းရန်';
+    saveButton.textContent =
+  '✓ စာရင်းအားလုံး တစ်ခါတည်း သိမ်းရန်';
   }
 
   clearHistoricalAdvanceManualResult();
@@ -1708,7 +2061,9 @@ function resetHistoricalAdvanceManual() {
     );
     return;
   }
-
+  historicalAdvanceDraftLines=[];
+historicalAdvanceDraftEditingId=null;
+historicalAdvanceLockHeader(false);
   historicalAdvanceEditingLotId = lot.serverId;
 
   showView('farmers', 'opening');
@@ -1780,17 +2135,231 @@ function resetHistoricalAdvanceManual() {
   function initializeHistoricalAdvanceManual(){
   let form=masterEl('historicalAdvanceManualForm');if(!form||form.dataset.ready)return;form.dataset.ready='true';let csvPanel=masterEl('openingBalanceMasterPanel'),csvTitle=csvPanel?.querySelector('.panel-head h3'),csvSubtitle=csvPanel?.querySelector('.panel-head .master-muted');if(csvTitle)csvTitle.textContent='CSV အစုလိုက်တင်ရန် (စာရင်းများစွာရှိမှ)';if(csvSubtitle)csvSubtitle.textContent='တစ်ခုချင်းမဟုတ်ဘဲ စာရင်းအများကြီးကို တစ်ခါတည်းတင်လိုမှ သုံးပါ';
   form.addEventListener('input',renderHistoricalAdvanceManual);form.addEventListener('change',renderHistoricalAdvanceManual);masterEl('historicalAdvanceProduct').addEventListener('change',()=>{let product=masterState.products.find(row=>row.product_id===masterEl('historicalAdvanceProduct').value);masterEl('historicalAdvanceUnitPrice').value=product&&Number(product.default_unit_price_kyat)>0?String(Math.round(Number(product.default_unit_price_kyat))):'';renderHistoricalAdvanceManual()});masterEl('resetHistoricalAdvanceManual').onclick=resetHistoricalAdvanceManual;
+    masterEl('addHistoricalAdvanceLine').onclick=
+  addHistoricalAdvanceDraftLine;
+
+masterEl('historicalAdvanceDraftBody').onclick=event=>{
+  let editButton=
+    event.target.closest('[data-edit-historical-draft]');
+
+  let deleteButton=
+    event.target.closest('[data-delete-historical-draft]');
+
+  let id=
+    editButton?.dataset.editHistoricalDraft||
+    deleteButton?.dataset.deleteHistoricalDraft;
+
+  if(!id)return;
+
+  let line=
+    historicalAdvanceDraftLines.find(
+      item=>item.id===id
+    );
+
+  if(!line)return;
+
+  if(deleteButton){
+    historicalAdvanceDraftLines=
+      historicalAdvanceDraftLines.filter(
+        item=>item.id!==id
+      );
+
+    if(historicalAdvanceDraftEditingId===id){
+      clearHistoricalAdvanceLineEditor();
+    }
+
+    if(!historicalAdvanceDraftLines.length){
+      historicalAdvanceLockHeader(false);
+    }
+
+    renderHistoricalAdvanceManual();
+    return;
+  }
+
+  historicalAdvanceDraftEditingId=id;
+
+  masterEl('historicalAdvanceType').value=
+    line.type;
+
+  masterEl('historicalAdvanceCashPrincipal').value=
+    line.type==='CASH'
+      ? String(line.principal)
+      : '';
+
+  masterEl('historicalAdvanceProduct').value=
+    line.payload.product_id||'';
+
+  masterEl('historicalAdvanceLocation').value=
+    line.payload.location_id||'';
+
+  masterEl('historicalAdvanceQuantity').value=
+    line.payload.quantity||'';
+
+  masterEl('historicalAdvanceUnitPrice').value=
+    line.payload.unit_price_kyat||'';
+
+  masterEl('addHistoricalAdvanceLine').textContent=
+    '✓ ဤ Line ကို ပြင်ရန်';
+
+  historicalAdvanceManualAttempted=false;
+
+  renderHistoricalAdvanceManual();
+};
   form.onsubmit=async event=>{
     event.preventDefault();
-historicalAdvanceManualAttempted=true;
+
 
 let check=renderHistoricalAdvanceManual();
-if(!check.valid)return;
+
+if(historicalAdvanceEditingLotId){
+  historicalAdvanceManualAttempted=true;
+  check=renderHistoricalAdvanceManual();
+
+  if(!check.valid)return;
     if(historicalAdvanceEditingLotId){
-  if(!confirm(
-    (check.farmer?.full_name||'တောင်သူ')+
-    ' ၏ ရှိပြီးသား စိုက်ထုတ်အကြွေးစာရင်းကို ပြင်ဆင်သိမ်းမည်လား?'
-  ))return;
+  if(!historicalAdvanceDraftLines.length){
+  historicalAdvanceManualSetResult(
+    'အနည်းဆုံး Line တစ်ကြောင်းကို ＋ စာရင်းထဲထည့်ပါ',
+    'error'
+  );
+  return;
+}
+
+let rows=
+  historicalAdvanceDraftLines.map(
+    line=>line.payload
+  );
+
+let total=
+  historicalAdvanceDraftLines.reduce(
+    (sum,line)=>sum+Number(line.principal||0),
+    0
+  );
+
+let firstRow=rows[0];
+
+if(!confirm(
+  historicalAdvanceDraftLines.length+
+  ' ကြောင်း · စုစုပေါင်း '+
+  signedMoney(total)+
+  ' ကို အရင်စိုက်ထုတ်အကြွေးအဖြစ် တစ်ခါတည်းသိမ်းမည်လား?'
+))return;
+
+historicalAdvanceManualSaving=true;
+
+let button=
+  masterEl('saveHistoricalAdvanceManual');
+
+button.textContent='အားလုံးသိမ်းနေသည်…';
+
+renderHistoricalAdvanceManual();
+
+let intent=null;
+let savedSuccessfully=false;
+
+try{
+  masterAssertOnline([
+    'owner',
+    'admin',
+    'accountant'
+  ]);
+
+  intent=historicalAdvanceRequestIntent({
+    rows
+  });
+
+  let {data,error}=
+    await supabaseClient.rpc(
+      'commit_historical_advance_import',
+      {
+        p_request_id:intent.requestId,
+
+        p_source_name:
+          'တစ်ကြိမ်စာ စိုက်ထုတ် · '+
+          firstRow.customer_id+
+          ' · '+
+          firstRow.opening_date,
+
+        p_rows:rows,
+
+        p_notes:
+          firstRow.notes||null
+      }
+    );
+
+  if(error)throw error;
+
+  let result=
+    Array.isArray(data)
+      ? data[0]
+      : data;
+
+  let ref=
+    result?.import_ref||'OB';
+
+  clearHistoricalAdvanceRequestIntent(
+    intent.requestId
+  );
+
+  savedSuccessfully=true;
+
+  await loadMasterData({
+    quiet:true
+  }).catch(()=>{});
+
+  if(
+    typeof financeOwnerReady==='function'&&
+    financeOwnerReady()&&
+    typeof loadFinanceData==='function'
+  ){
+    await loadFinanceData({
+      quiet:true
+    }).catch(()=>{});
+  }
+
+  resetHistoricalAdvanceManual();
+
+  historicalAdvanceManualSetResult(
+    '✓ '+
+    ref+
+    ' · '+
+    rows.length+
+    ' ကြောင်း · '+
+    signedMoney(
+      Number(
+        result?.total_principal_kyat||
+        total
+      )
+    )+
+    ' Server တွင် တစ်ခါတည်းသိမ်းပြီး',
+    'ok'
+  );
+
+  toast.textContent=
+    '✓ '+
+    ref+
+    ' · စိုက်ထုတ် '+
+    rows.length+
+    ' ကြောင်း သိမ်းပြီး';
+
+  showToast();
+
+}catch(error){
+  historicalAdvanceManualSetResult(
+    masterFriendlyError(error),
+    'error'
+  );
+
+}finally{
+  historicalAdvanceManualSaving=false;
+
+  if(!savedSuccessfully){
+    button.textContent=
+      '✓ စာရင်းအားလုံး တစ်ခါတည်း သိမ်းရန်';
+  }
+
+  renderHistoricalAdvanceManual();
+}
 
   historicalAdvanceManualSaving=true;
 
