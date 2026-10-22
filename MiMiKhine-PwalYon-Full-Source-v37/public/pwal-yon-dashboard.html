@@ -1296,9 +1296,26 @@ advanceLedgerBody.addEventListener('click', async event => {
     button.disabled = false;
     button.textContent = 'မှတ်ချက်ပြင်ရန်';
   }
+  
+});
+  advanceLedgerBody.addEventListener('click',event=>{
+  const button=event.target.closest('[data-edit-historical-advance]');
+  if(!button)return;
+
+  const lot=advanceLots.find(
+    item=>item.serverId===button.dataset.editHistoricalAdvance
+  );
+
+  if(!lot){
+    liveMessage('ပြင်ရန် စိုက်ထုတ်အကြွေးစာရင်းကို မတွေ့ပါ');
+    return;
+  }
+
+  startHistoricalAdvanceEdit(lot);
 });
 function renderAdvanceRepayments(){advanceRepaymentBody.innerHTML=advanceRepayments.length?advanceRepayments.map(payment=>`<tr><td><b>${safeText(payment.id)}</b></td><td>${formatAdvanceDate(payment.paymentDate)}</td><td>${safeText(payment.farmerName)}</td><td>${safeText(payment.description)}</td><td>${signedMoney(payment.principal)}</td><td>${signedMoney(payment.interest)}</td><td>${signedMoney(payment.total)}</td><td>${safeText(payment.remainingDescription)}</td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted)">ပြန်ဆပ်ထားမှု မရှိသေးပါ</td></tr>'}
-function renderAdvanceModule(){if(!document.getElementById('advanceLedgerBody'))return;syncRepaymentFarmers();renderAdvanceLedger();renderAdvanceRepayments();loan();if(document.getElementById('consignmentSettlementPanel'))consignmentSettlementCalculation()}
+
+  function renderAdvanceModule(){if(!document.getElementById('advanceLedgerBody'))return;syncRepaymentFarmers();renderAdvanceLedger();renderAdvanceRepayments();loan();if(document.getElementById('consignmentSettlementPanel'))consignmentSettlementCalculation()}
 function quoteAdvancePrincipalFIFO(customerId,amount,paymentDate=todayIso()){let unallocated=Math.max(0,Math.round(amount||0)),allocations=[];for(let lot of openAdvanceLots(customerId)){if(!unallocated)break;let principal=Math.min(unallocated,lot.remainingPrincipal),quantity=lot.type==='GOODS'?(principal>=lot.remainingPrincipal?lot.remainingQty:Math.round(principal/lot.unitPrice*10000)/10000):null,days=elapsedDays(lot.issuedDate,paymentDate),halfMonthSteps=advanceInterestHalfMonthSteps(days),monthUnits=halfMonthSteps/2,interest=simpleAdvanceInterest(principal,lot.monthlyRate,days);allocations.push({lotId:lot.id,itemName:lot.itemName,type:lot.type,principal,quantity,unit:lot.unit,unitPrice:lot.unitPrice,days,halfMonthSteps,monthUnits,monthlyRate:lot.monthlyRate,interest,total:principal+interest});unallocated-=principal}let principal=allocations.reduce((sum,item)=>sum+item.principal,0),interest=allocations.reduce((sum,item)=>sum+item.interest,0);return{customerId,paymentDate,requested:Math.max(0,Math.round(amount||0)),allocations,principal,interest,total:principal+interest,unallocated}}
 const settlementDebtControl=prefix=>({
   bean:{select:beanDebtLotSelect,cash:debtRepayment,cashField:beanDebtCashField,quantity:beanDebtQuantity,goodsField:beanDebtGoodsField,unitPrice:beanDebtUnitPrice,unitPriceField:beanDebtUnitPriceField,goodsPrincipal:beanDebtGoodsPrincipal,goodsPrincipalField:beanDebtGoodsPrincipalField},
@@ -1425,8 +1442,11 @@ const MASTER_TABLE_COLUMNS={
 const masterState={farmers:[],crops:[],products:[],locations:[],staff:[],imports:[],entries:[],loaded:false,source:'EMPTY',updatedAt:null};
 const masterEdit={farmer:null,crop:null,product:null,location:null};
 let masterRealtimeChannel=null,masterRefreshTimer=null,masterLoading=false,openingPreviewState=null;
-let historicalAdvanceManualSaving=false,historicalAdvanceManualAttempted=false,historicalAdvanceMemoryIntent=null;
-const HISTORICAL_ADVANCE_MANUAL_INTENT_KEY='pwalYonHistoricalAdvanceSingleIntent.v1';
+let historicalAdvanceManualSaving=false,
+    historicalAdvanceManualAttempted=false,
+    historicalAdvanceMemoryIntent=null,
+    historicalAdvanceEditingLotId=null;
+  const HISTORICAL_ADVANCE_MANUAL_INTENT_KEY='pwalYonHistoricalAdvanceSingleIntent.v1';
 const masterEl=id=>document.getElementById(id);
 const masterRoleIn=roles=>Boolean(supabaseStaffMember?.active&&roles.includes(supabaseStaffMember.role));
 const masterCanFarmers=()=>masterRoleIn(['owner','admin','accountant']);
@@ -1633,26 +1653,220 @@ function historicalAdvanceRequestIntent(payload){
   if(historicalAdvanceMemoryIntent?.signature===signature)return historicalAdvanceMemoryIntent;let next={signature,requestId:createUuid()};historicalAdvanceMemoryIntent=next;try{localStorage.setItem(key,JSON.stringify(next))}catch(error){}return next;
 }
 function clearHistoricalAdvanceRequestIntent(requestId){let key=historicalAdvanceIntentKey();try{let saved=JSON.parse(localStorage.getItem(key)||'null');if(!requestId||saved?.requestId===requestId)localStorage.removeItem(key)}catch(error){}if(!requestId||historicalAdvanceMemoryIntent?.requestId===requestId)historicalAdvanceMemoryIntent=null}
-function resetHistoricalAdvanceManual(){
-  let form=masterEl('historicalAdvanceManualForm');
-  if(!form)return;
+function resetHistoricalAdvanceManual() {
+  let form = masterEl('historicalAdvanceManualForm');
+  if (!form) return;
+
+  historicalAdvanceEditingLotId = null;
 
   form.reset();
 
-  let dateInput=masterEl('historicalAdvanceOpeningDate');
-  dateInput.max=openBusinessDate;
-  dateInput.value=openBusinessDate;
+  masterEl('historicalAdvanceOpeningDate').value = openBusinessDate;
+  masterEl('historicalAdvanceMonthlyRate').value = '3';
 
-  masterEl('historicalAdvanceMonthlyRate').value='3';
+  historicalAdvanceManualAttempted = false;
 
-  historicalAdvanceManualAttempted=false;
+  let saveButton = masterEl('saveHistoricalAdvanceManual');
+
+  if (saveButton) {
+    saveButton.textContent = '✓ အကြွေး Lot တစ်ခု သိမ်းရန်';
+  }
+
   clearHistoricalAdvanceManualResult();
   renderHistoricalAdvanceManual();
-}function initializeHistoricalAdvanceManual(){
+}
+  function startHistoricalAdvanceEdit(lot) {
+  if (!lot || !lot.serverId || !lot.openingEntryId) {
+    liveMessage('ဤစာရင်းသည် အရင်စိုက်ထုတ်စာရင်း မဟုတ်ပါ');
+    return;
+  }
+
+  let hasRepayment = advanceRepayments.some(
+    payment => payment.advanceId === lot.id
+  );
+
+  if (lot.status !== 'OPEN' || hasRepayment) {
+    liveMessage(
+      'ပြန်ဆပ်ထားပြီးသော သို့မဟုတ် လက်ကျန်ပြောင်းထားသော စာရင်းကို ပြင်၍မရပါ'
+    );
+    return;
+  }
+
+  historicalAdvanceEditingLotId = lot.serverId;
+
+  showView('farmers', 'opening');
+  syncHistoricalAdvanceManualOptions();
+
+  let farmerField = masterEl('historicalAdvanceFarmer');
+
+  if (farmerField.tagName === 'SELECT') {
+    let matchingOption = [...farmerField.options].find(option =>
+      option.value === lot.customerId ||
+      option.value.startsWith(lot.customerId + '|') ||
+      option.value.startsWith(lot.customerId + ' ·')
+    );
+
+    if (matchingOption) {
+      farmerField.value = matchingOption.value;
+    }
+  } else {
+    farmerField.value =
+      lot.customerId + ' · ' + lot.farmerName;
+  }
+
+  masterEl('historicalAdvanceOpeningDate').value = lot.issuedDate;
+  masterEl('historicalAdvanceType').value = lot.type;
+  masterEl('historicalAdvanceMonthlyRate').value =
+    String(lot.monthlyRate);
+
+  masterEl('historicalAdvanceNote').value = lot.note || '';
+
+  masterEl('historicalAdvanceCashPrincipal').value = '';
+  masterEl('historicalAdvanceProduct').value = '';
+  masterEl('historicalAdvanceLocation').value = '';
+  masterEl('historicalAdvanceQuantity').value = '';
+  masterEl('historicalAdvanceUnitPrice').value = '';
+
+  if (lot.type === 'CASH') {
+    masterEl('historicalAdvanceCashPrincipal').value =
+      String(lot.originalPrincipal);
+  } else {
+    masterEl('historicalAdvanceProduct').value =
+      lot.productCode || '';
+
+    masterEl('historicalAdvanceLocation').value =
+      lot.locationId || '';
+
+    masterEl('historicalAdvanceQuantity').value =
+      String(lot.originalQty || '');
+
+    masterEl('historicalAdvanceUnitPrice').value =
+      String(lot.unitPrice || '');
+  }
+
+  masterEl('saveHistoricalAdvanceManual').textContent =
+    '✓ ပြင်ဆင်မှု သိမ်းရန်';
+
+  historicalAdvanceManualSetResult(
+    'ပြင်ဆင်နေသောစာရင်း — ' + lot.id +
+    ' · ပြန်ဆပ်ထားခြင်းမရှိသေးသော အရင်စာရင်း',
+    'ok'
+  );
+
+  renderHistoricalAdvanceManual();
+
+  setTimeout(() => {
+    masterEl('historicalAdvanceManualPanel')
+      ?.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
+}
+  function initializeHistoricalAdvanceManual(){
   let form=masterEl('historicalAdvanceManualForm');if(!form||form.dataset.ready)return;form.dataset.ready='true';let csvPanel=masterEl('openingBalanceMasterPanel'),csvTitle=csvPanel?.querySelector('.panel-head h3'),csvSubtitle=csvPanel?.querySelector('.panel-head .master-muted');if(csvTitle)csvTitle.textContent='CSV အစုလိုက်တင်ရန် (စာရင်းများစွာရှိမှ)';if(csvSubtitle)csvSubtitle.textContent='တစ်ခုချင်းမဟုတ်ဘဲ စာရင်းအများကြီးကို တစ်ခါတည်းတင်လိုမှ သုံးပါ';
   form.addEventListener('input',renderHistoricalAdvanceManual);form.addEventListener('change',renderHistoricalAdvanceManual);masterEl('historicalAdvanceProduct').addEventListener('change',()=>{let product=masterState.products.find(row=>row.product_id===masterEl('historicalAdvanceProduct').value);masterEl('historicalAdvanceUnitPrice').value=product&&Number(product.default_unit_price_kyat)>0?String(Math.round(Number(product.default_unit_price_kyat))):'';renderHistoricalAdvanceManual()});masterEl('resetHistoricalAdvanceManual').onclick=resetHistoricalAdvanceManual;
   form.onsubmit=async event=>{
-    event.preventDefault();historicalAdvanceManualAttempted=true;let check=renderHistoricalAdvanceManual();if(!check.valid)return;if(!confirm((check.farmer?.full_name||'တောင်သူ')+' · '+check.payload.opening_date+' · '+signedMoney(check.principal)+' ကို အရင်စိုက်ထုတ်အကြွေးအဖြစ် သိမ်းမည်လား?'))return;
+    event.preventDefault();
+historicalAdvanceManualAttempted=true;
+
+let check=renderHistoricalAdvanceManual();
+if(!check.valid)return;
+    if(historicalAdvanceEditingLotId){
+  if(!confirm(
+    (check.farmer?.full_name||'တောင်သူ')+
+    ' ၏ ရှိပြီးသား စိုက်ထုတ်အကြွေးစာရင်းကို ပြင်ဆင်သိမ်းမည်လား?'
+  ))return;
+
+  historicalAdvanceManualSaving=true;
+
+  const button=masterEl('saveHistoricalAdvanceManual');
+  button.textContent='ပြင်နေသည်…';
+  renderHistoricalAdvanceManual();
+
+  let editSucceeded=false;
+
+  try{
+    masterAssertOnline(['owner']);
+
+    const saved=await financeRpc('update_historical_advance',{
+      p_advance_lot_id:historicalAdvanceEditingLotId,
+
+      p_customer_id:check.payload.customer_id,
+      p_opening_date:check.payload.opening_date,
+      p_advance_type:check.payload.advance_type,
+
+      p_principal_kyat:
+        check.payload.advance_type==='CASH'
+          ? Math.round(check.principal)
+          : null,
+
+      p_monthly_interest_rate:
+        Number(check.payload.monthly_rate),
+
+      p_product_id:
+        check.payload.advance_type==='GOODS'
+          ? check.payload.product_id
+          : null,
+
+      p_location_id:
+        check.payload.advance_type==='GOODS'
+          ? check.payload.location_id
+          : null,
+
+      p_quantity:
+        check.payload.advance_type==='GOODS'
+          ? Number(check.payload.quantity)
+          : null,
+
+      p_unit_price_kyat:
+        check.payload.advance_type==='GOODS'
+          ? Math.round(Number(check.payload.unit_price_kyat))
+          : null,
+
+      p_notes:check.notes||null
+    });
+
+    editSucceeded=true;
+
+    await loadMasterData({quiet:true}).catch(()=>{});
+
+    if(
+      typeof financeOwnerReady==='function' &&
+      financeOwnerReady() &&
+      typeof loadFinanceData==='function'
+    ){
+      await loadFinanceData({quiet:true}).catch(()=>{});
+    }
+
+    const ref=
+      saved?.document_ref||
+      saved?.advance_ref||
+      'စိုက်ထုတ်အကြွေး';
+
+    liveMessage('✓ '+ref+' စာရင်းကို ပြင်ဆင်ပြီး');
+
+    toast.textContent='✓ '+ref+' စာရင်းကို ပြင်ဆင်ပြီး';
+    showToast();
+
+  }catch(error){
+    historicalAdvanceManualSetResult(
+      masterFriendlyError(error),
+      'error'
+    );
+
+  }finally{
+    historicalAdvanceManualSaving=false;
+
+    if(editSucceeded){
+      resetHistoricalAdvanceManual();
+      showView('loans','ledger');
+    }else{
+      button.textContent='✓ ပြင်ဆင်မှု သိမ်းရန်';
+      renderHistoricalAdvanceManual();
+    }
+  }
+
+  return;
+}
+    if(!confirm((check.farmer?.full_name||'တောင်သူ')+' · '+check.payload.opening_date+' · '+signedMoney(check.principal)+' ကို အရင်စိုက်ထုတ်အကြွေးအဖြစ် သိမ်းမည်လား?'))return;
     historicalAdvanceManualSaving=true;let button=masterEl('saveHistoricalAdvanceManual'),label=button.textContent;button.textContent='သိမ်းနေသည်…';renderHistoricalAdvanceManual();let intent=null;
     try{
       masterAssertOnline(['owner','admin','accountant']);intent=historicalAdvanceRequestIntent(check.payload);let{data,error}=await supabaseClient.rpc('commit_historical_advance_import',{p_request_id:intent.requestId,p_source_name:'တစ်ခုချင်း စိုက်ထုတ် · '+check.payload.customer_id+' · '+check.payload.opening_date,p_rows:[check.payload],p_notes:check.notes||null});if(error)throw error;let result=Array.isArray(data)?data[0]:data,ref=result?.import_ref||'OB';clearHistoricalAdvanceRequestIntent(intent.requestId);
@@ -1724,7 +1938,9 @@ function financeUpdateDashboard(){
 function financeApplySnapshot(raw,source='SERVER',updatedAt=new Date().toISOString()){
   let safe={lots:Array.isArray(raw?.lots)?raw.lots:[],repayments:Array.isArray(raw?.repayments)?raw.repayments:[],sales:Array.isArray(raw?.sales)?raw.sales:[],receipts:Array.isArray(raw?.receipts)?raw.receipts:[],movements:Array.isArray(raw?.movements)?raw.movements:[],cash:Array.isArray(raw?.cash)?raw.cash:[],cashFlow:Array.isArray(raw?.cashFlow)?raw.cashFlow:[],expenses:Array.isArray(raw?.expenses)?raw.expenses:[],balances:Array.isArray(raw?.balances)?raw.balances:[],debts:Array.isArray(raw?.debts)?raw.debts:[]};
   financeState.raw=safe;financeState.source=source;financeState.ready=true;financeState.error='';financeState.updatedAt=updatedAt;financeState.balances=new Map(safe.balances.map(row=>[financeStockKey(row.product_id,row.location_id),financeNumber(row.quantity)]));financeState.debts=new Map(safe.debts.map(row=>[row.customer_id,financeNumber(row.remaining_principal_kyat)]));
-  advanceLots=safe.lots.map(row=>({serverId:row.id,id:row.advance_ref,customerId:row.customer_id,farmerName:row.farmer_name_snapshot,issuedDate:String(row.issued_date).slice(0,10),type:row.advance_type,productCode:row.product_id,locationId:row.location_id,itemName:row.product_name_snapshot||'ငွေသား',unit:row.unit_name_snapshot||'ကျပ်',unitPrice:financeNumber(row.unit_price_kyat)||1,wholeUnits:row.whole_units_only===true,originalQty:row.original_quantity===null?null:financeNumber(row.original_quantity),remainingQty:row.remaining_quantity===null?null:financeNumber(row.remaining_quantity),originalPrincipal:financeNumber(row.original_principal_kyat),remainingPrincipal:financeNumber(row.remaining_principal_kyat),monthlyRate:financeNumber(row.monthly_interest_rate),status:row.status,note:row.notes||'',createdAt:row.created_at}));
+  advanceLots=safe.lots.map(row=>({serverId:row.id,
+openingEntryId:row.opening_balance_entry_id,
+id:row.advance_ref,customerId:row.customer_id,farmerName:row.farmer_name_snapshot,issuedDate:String(row.issued_date).slice(0,10),type:row.advance_type,productCode:row.product_id,locationId:row.location_id,itemName:row.product_name_snapshot||'ငွေသား',unit:row.unit_name_snapshot||'ကျပ်',unitPrice:financeNumber(row.unit_price_kyat)||1,wholeUnits:row.whole_units_only===true,originalQty:row.original_quantity===null?null:financeNumber(row.original_quantity),remainingQty:row.remaining_quantity===null?null:financeNumber(row.remaining_quantity),originalPrincipal:financeNumber(row.original_principal_kyat),remainingPrincipal:financeNumber(row.remaining_principal_kyat),monthlyRate:financeNumber(row.monthly_interest_rate),status:row.status,note:row.notes||'',createdAt:row.created_at}));
   let lotsById=new Map(advanceLots.map(lot=>[lot.serverId,lot]));advanceRepayments=safe.repayments.map(row=>{let lot=lotsById.get(row.advance_lot_id),quantity=row.selected_quantity===null?null:financeNumber(row.selected_quantity),description=lot?.type==='GOODS'?(lot.itemName+' '+mm(quantity)+' '+lot.unit):(lot?.itemName||'ငွေသား')+' အရင်း '+signedMoney(financeNumber(row.principal_kyat)),remainingDescription=lot?.type==='GOODS'?mm(financeNumber(row.remaining_quantity))+' '+lot.unit+' / '+signedMoney(financeNumber(row.remaining_principal_kyat)):signedMoney(financeNumber(row.remaining_principal_kyat));return{id:row.repayment_ref,advanceId:lot?.id||row.advance_lot_id,paymentDate:String(row.payment_date).slice(0,10),customerId:lot?.customerId||'',farmerName:lot?.farmerName||'—',description:description+' · '+mm(financeNumber(row.elapsed_days))+' ရက် / '+advanceInterestPeriodLabel(financeNumber(row.elapsed_days)),principal:financeNumber(row.principal_kyat),interest:financeNumber(row.interest_kyat),total:financeNumber(row.total_received_kyat),method:row.payment_method,reference:row.payment_reference||'',remainingDescription}});
   inputSales=safe.sales.map(row=>({id:row.sale_ref,time:new Date(row.created_at),customerType:row.customer_type,customer:row.buyer_name,productCode:row.product_id,productName:row.product_name_snapshot,locationId:row.location_id,qty:financeNumber(row.quantity),unit:row.unit_name_snapshot,unitPrice:financeNumber(row.unit_price_kyat),total:financeNumber(row.total_kyat),method:row.payment_method,reference:row.payment_reference||'',note:row.notes||'',stockBefore:financeNumber(row.stock_before),stockAfter:financeNumber(row.stock_after)}));
   stockReceipts=safe.receipts.map(row=>({id:row.receipt_ref,businessDate:String(row.business_date).slice(0,10),time:new Date(row.created_at),supplier:row.supplier_name,productCode:row.product_id,productName:row.product_name_snapshot,locationId:row.location_id,qty:financeNumber(row.quantity),unit:row.unit_name_snapshot,unitCost:financeNumber(row.unit_cost_kyat),total:financeNumber(row.total_kyat),method:row.payment_method,reference:row.payment_reference||'',note:row.notes||'',stockBefore:financeNumber(row.stock_before),stockAfter:financeNumber(row.stock_after)}));
@@ -1737,7 +1953,7 @@ async function financeQuery(resultPromise){let result=await resultPromise;if(res
 async function loadFinanceData({quiet=false}={}){
   if(!financeOwnerReady())throw Object.assign(new Error('Owner account required'),{code:'42501'});if(financeState.loading)return;financeState.loading=true;if(!quiet)financeSetStatus('LOGIN','Supabase Owner Finance Ledger ဖတ်နေသည်…');financeRefreshWriteAccess();
   try{let date=todayIso(),[lots,repayments,sales,receipts,movements,cash,cashFlow,expenses,balances,debts]=await Promise.all([
-    masterFetchAll('advance_lots','id,advance_ref,customer_id,farmer_name_snapshot,advance_type,product_id,location_id,product_name_snapshot,unit_name_snapshot,whole_units_only,unit_price_kyat,original_quantity,remaining_quantity,original_principal_kyat,remaining_principal_kyat,monthly_interest_rate,issued_date,status,notes,created_at','advance_ref'),
+    masterFetchAll('advance_lots','id,opening_balance_entry_id,advance_ref,customer_id,farmer_name_snapshot,advance_type,product_id,location_id,product_name_snapshot,unit_name_snapshot,whole_units_only,unit_price_kyat,original_quantity,remaining_quantity,original_principal_kyat,remaining_principal_kyat,monthly_interest_rate,issued_date,status,notes,created_at','advance_ref'),
     financeQuery(supabaseClient.from('advance_repayments').select('id,repayment_ref,advance_lot_id,payment_date,selected_quantity,principal_kyat,interest_kyat,total_received_kyat,elapsed_days,half_month_steps,payment_method,payment_reference,remaining_quantity,remaining_principal_kyat,created_at').order('created_at',{ascending:false}).limit(FINANCE_ROW_LIMIT)),
     financeQuery(supabaseClient.from('finance_product_sales').select('id,sale_ref,business_date,customer_type,customer_id,buyer_name,product_id,location_id,product_name_snapshot,unit_name_snapshot,quantity,unit_price_kyat,total_kyat,payment_method,payment_reference,notes,stock_before,stock_after,created_at').eq('business_date',date).order('created_at',{ascending:false}).limit(FINANCE_ROW_LIMIT)),
     financeQuery(supabaseClient.from('finance_stock_receipts').select('id,receipt_ref,business_date,supplier_name,product_id,location_id,product_name_snapshot,unit_name_snapshot,whole_units_only,quantity,unit_cost_kyat,total_kyat,payment_method,payment_reference,notes,stock_before,stock_after,created_at').order('created_at',{ascending:false}).limit(FINANCE_ROW_LIMIT)),
