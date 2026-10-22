@@ -2211,13 +2211,12 @@ masterEl('historicalAdvanceDraftBody').onclick=event=>{
 
 let check=renderHistoricalAdvanceManual();
 
-if(historicalAdvanceEditingLotId){
-  historicalAdvanceManualAttempted=true;
+historicalAdvanceManualAttempted=Boolean(historicalAdvanceEditingLotId);
   check=renderHistoricalAdvanceManual();
 
-  if(!check.valid)return;
-    if(historicalAdvanceEditingLotId){
-  if(!historicalAdvanceDraftLines.length){
+  if(historicalAdvanceEditingLotId&&!check.valid)return;
+  if(!historicalAdvanceEditingLotId){
+    if(!historicalAdvanceDraftLines.length){
   historicalAdvanceManualSetResult(
     'အနည်းဆုံး Line တစ်ကြောင်းကို ＋ စာရင်းထဲထည့်ပါ',
     'error'
@@ -2358,13 +2357,21 @@ try{
       '✓ စာရင်းအားလုံး တစ်ခါတည်း သိမ်းရန်';
   }
 
-  renderHistoricalAdvanceManual();
+   renderHistoricalAdvanceManual();
 }
+
+  return;
+}
+
+  if(!confirm(
+    (check.farmer?.full_name||'တောင်သူ')+
+    ' ၏ ရှိပြီးသား စိုက်ထုတ်အကြွေးစာရင်းကို ပြင်ဆင်သိမ်းမည်လား?'
+  ))return;
 
   historicalAdvanceManualSaving=true;
 
   const button=masterEl('saveHistoricalAdvanceManual');
-  button.textContent='ပြင်နေသည်…';
+    button.textContent='ပြင်နေသည်…';
   renderHistoricalAdvanceManual();
 
   let editSucceeded=false;
@@ -2451,13 +2458,8 @@ try{
   }
 
   return;
-}
-    if(!confirm((check.farmer?.full_name||'တောင်သူ')+' · '+check.payload.opening_date+' · '+signedMoney(check.principal)+' ကို အရင်စိုက်ထုတ်အကြွေးအဖြစ် သိမ်းမည်လား?'))return;
-    historicalAdvanceManualSaving=true;let button=masterEl('saveHistoricalAdvanceManual'),label=button.textContent;button.textContent='သိမ်းနေသည်…';renderHistoricalAdvanceManual();let intent=null;
-    try{
-      masterAssertOnline(['owner','admin','accountant']);intent=historicalAdvanceRequestIntent(check.payload);let{data,error}=await supabaseClient.rpc('commit_historical_advance_import',{p_request_id:intent.requestId,p_source_name:'တစ်ခုချင်း စိုက်ထုတ် · '+check.payload.customer_id+' · '+check.payload.opening_date,p_rows:[check.payload],p_notes:check.notes||null});if(error)throw error;let result=Array.isArray(data)?data[0]:data,ref=result?.import_ref||'OB';clearHistoricalAdvanceRequestIntent(intent.requestId);
-      masterEl('historicalAdvanceCashPrincipal').value='';masterEl('historicalAdvanceQuantity').value='';masterEl('historicalAdvanceNote').value='';historicalAdvanceManualAttempted=false;await loadMasterData({quiet:true}).catch(()=>{});if(typeof financeOwnerReady==='function'&&financeOwnerReady()&&typeof loadFinanceData==='function')await loadFinanceData({quiet:true}).catch(()=>{});historicalAdvanceManualSetResult('✓ '+ref+' · '+signedMoney(Number(result?.total_principal_kyat||check.principal))+' Server တွင် သိမ်းပြီး'+(result?.idempotent?' · ထပ်မတင်ဘဲ မူလရလဒ်ပြန်ပေးသည်':''),'ok');toast.textContent='✓ '+ref+' · အရင်စိုက်ထုတ်အကြွေး သိမ်းပြီး';showToast();
-    }catch(error){historicalAdvanceManualSetResult(masterFriendlyError(error),'error')}finally{historicalAdvanceManualSaving=false;button.textContent=label;renderHistoricalAdvanceManual()}
+
+    
   };
   syncHistoricalAdvanceManualOptions();resetHistoricalAdvanceManual();
 }
