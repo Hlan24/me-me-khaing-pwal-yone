@@ -631,7 +631,7 @@ active          BOOLEAN</code></div></div>
     </section>
     <section class="view" id="farmers">
       <div class="master-status" id="masterDataStatus" role="status" aria-live="polite"><strong>Stage 2 · Master Data</strong><span id="masterDataStatusText">ဝန်ထမ်း Login ဝင်ပြီး Server စာရင်းဖတ်ပါ</span><span class="master-sync" id="masterDataSyncBadge">LOGIN လိုသည်</span></div>
-      <div class="farmer-stats"><div class="farmer-stat"><small>တောင်သူ စုစုပေါင်း</small><b id="farmerTotalStat">၃၄၆</b><span>Customer ID ဖြင့် မှတ်တမ်းတင်ထား</span></div><div class="farmer-stat"><small>Active တောင်သူ</small><b id="farmerActiveStat">၃၃၈</b><span>စိုက်ထုတ်/ချိန်တွယ်နိုင်</span></div><div class="farmer-stat"><small>အကြွေးလက်ကျန် စုစုပေါင်း</small><b id="farmerDebtStat">ကျပ် ၁၂၈.၄ သန်း</b><span>Running Ledger Balance</span></div><div class="farmer-stat"><small>Blacklist</small><b id="farmerBlacklistStat">၈</b><span style="color:var(--red)">စိုက်ထုတ်မှုတားဆီးထား</span></div></div>
+      <div class="farmer-stats"><div class="farmer-stat"><small>တောင်သူ စုစုပေါင်း</small><b id="farmerTotalStat">၃၄၆</b><span>Customer ID ဖြင့် မှတ်တမ်းတင်ထား</span></div><div class="farmer-stat"><small>Active တောင်သူ</small><b id="farmerActiveStat">၃၃၈</b><span>စိုက်ထုတ်/ချိန်တွယ်နိုင်</span></div><div class="farmer-stat"><small>အကြွေးလက်ကျန် စုစုပေါင်း</small><b id="farmerDebtStat">ကျပ် ၁,၂၈၄ သိန်း</b><span>Running Ledger Balance</span></div><div class="farmer-stat"><small>Blacklist</small><b id="farmerBlacklistStat">၈</b><span style="color:var(--red)">စိုက်ထုတ်မှုတားဆီးထား</span></div></div>
       <div class="panel farmer-form-panel hidden" id="farmerFormPanel"><div class="panel-head"><div><h3>တောင်သူအသစ် KYC မှတ်တမ်း</h3><span style="font-size:11px;color:var(--muted)">Customer ID ကို စနစ်မှ အလိုအလျောက်ထုတ်ပေးပါမည်</span></div><button class="btn" id="closeFarmerForm" type="button">✕ ပိတ်ရန်</button></div>
         <form id="farmerForm" class="farmer-form-grid">
           <div class="farmer-id-card"><small>Customer ID အသစ်</small><b id="farmerIdPreview">F-347</b></div><div class="field"><label for="farmerName">တောင်သူအမည် *</label><input id="farmerName" required placeholder="ဥပမာ — ဦးအောင်နိုင်"></div><div class="field"><label for="farmerPhone">ဖုန်းနံပါတ် *</label><input id="farmerPhone" required inputmode="tel" placeholder="09 123 456 789"></div>
@@ -1918,7 +1918,33 @@ repayDebt.onchange=()=>{if(!repayDebt.checked){beanDebtLotSelect.value='';beanDe
 syncSettlementDebtLots('bean',customerInfo().id,false);syncSettlementDebtLots('chili',customerInfo().id,false);settlementCalculation();chiliCalculation();
 const normalizePhone=value=>String(value).replace(/\D/g,'');
 const riskClass=risk=>({'Low':'risk-low','Medium':'risk-medium','High':'risk-high','Blacklisted':'risk-blacklisted'}[risk]||'risk-low');
-function updateFarmerDashboard(){farmerTotalStat.textContent=mm(farmerTotal);farmerActiveStat.textContent=mm(farmerActive);farmerBlacklistStat.textContent=mm(farmerBlacklist);farmerCountDisplay.textContent='('+mm(farmerTotal)+')';farmerDebtStat.textContent='ကျပ် '+new Intl.NumberFormat('my-MM',{minimumFractionDigits:1,maximumFractionDigits:1}).format(farmerDebtTotal/1000000)+' သန်း';farmerIdPreview.textContent='F-'+String(nextFarmerId).padStart(3,'0')}
+function updateFarmerDashboard() {
+  farmerTotalStat.textContent = mm(farmerTotal);
+
+  farmerActiveStat.textContent = mm(farmerActive);
+
+  farmerBlacklistStat.textContent = mm(farmerBlacklist);
+
+  farmerCountDisplay.textContent =
+    '(' + mm(farmerTotal) + ')';
+
+  const debtInLakhs =
+    Number(farmerDebtTotal || 0) / 100000;
+
+  farmerDebtStat.textContent =
+    'ကျပ် ' +
+    new Intl.NumberFormat(
+      'my-MM',
+      {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 1
+      }
+    ).format(debtInLakhs) +
+    ' သိန်း';
+
+  farmerIdPreview.textContent =
+    'F-' + String(nextFarmerId).padStart(3, '0');
+}
 function openFarmerForm(){showView('farmers','new');updateFarmerDashboard();farmerFormPanel.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>farmerName.focus(),120)}
 function closeFarmerEntry(){farmerForm.reset();farmerOpeningDebt.value=0;updateFarmerDashboard();showView('farmers','list')}
 addFarmerBtn.onclick=openFarmerForm;closeFarmerForm.onclick=closeFarmerEntry;cancelFarmer.onclick=closeFarmerEntry;
