@@ -372,7 +372,7 @@ active          BOOLEAN</code></div></div>
           <div class="field goods-only hidden"><label>အရေအတွက်</label><input id="goodsQty" type="number" min="1" step="1" value="10"></div>
           <div class="field goods-only hidden"><label>ယူနစ် (Catalog အတိုင်း)</label><select id="goodsUnit" disabled><option>အိတ်</option><option>ဗူး</option><option>ပုလင်း</option><option>ထုပ်</option><option>ကီလို</option><option>ခု</option></select></div>
           <div class="field goods-only hidden"><label>ထုတ်ပေးစဉ် တစ်ယူနစ်တန်ဖိုး (ကျပ်)</label><input id="unitPrice" type="number" min="1" step="1" value="85000"></div>
-          <div class="field"><label>လစဉ် ရိုးရိုးအတိုးနှုန်း (%)</label><input id="rate" type="number" min="0" max="100" step="0.01" value="3"></div>
+          <div class="field"><label>လစဉ် ရိုးရိုးအတိုးနှုန်း (%)</label><input id="rate" type="number" min="0" max="100" step="0.01" value="4"></div>
           <div class="field"><label>မှတ်ချက်</label><input id="advanceNote" placeholder="ဥပမာ — မိုးရာသီ စိုက်ပျိုးစရိတ်"></div>
         </div>
         <div class="calc"><div><small id="baseLabel">အရင်းငွေ</small><b id="pOut">ကျပ် ၅,၀၀၀,၀၀၀</b></div><div><small>ယနေ့ဆပ်လျှင် အတိုး</small><b id="iOut">ကျပ် ၀</b></div><div><small>ယနေ့ဆပ်လျှင် လက်ခံငွေ</small><b id="tOut">ကျပ် ၅,၀၀၀,၀၀၀</b></div></div>
@@ -664,7 +664,7 @@ active          BOOLEAN</code></div></div>
             <div class="field"><label for="historicalAdvanceQuantity">အရေအတွက် *</label><input id="historicalAdvanceQuantity" type="number" min="0.001" step="0.001" inputmode="decimal" placeholder="0"></div>
             <div class="field"><label for="historicalAdvanceUnitPrice">ထုတ်ပေးစဉ် တစ်ယူနစ်တန်ဖိုး (ကျပ်) *</label><input id="historicalAdvanceUnitPrice" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></div>
           </div>
-          <div class="field"><label for="historicalAdvanceMonthlyRate">လစဉ် ရိုးရိုးအတိုးနှုန်း (%) *</label><input id="historicalAdvanceMonthlyRate" type="number" min="0" max="100" step="0.0001" inputmode="decimal" value="3"></div>
+          <div class="field"><label for="historicalAdvanceMonthlyRate">လစဉ် ရိုးရိုးအတိုးနှုန်း (%) *</label><input id="historicalAdvanceMonthlyRate" type="number" min="0" max="100" step="0.0001" inputmode="decimal" value="4"></div>
           <div class="field"><label for="historicalAdvanceNote">မှတ်ချက်</label><input id="historicalAdvanceNote" maxlength="500" placeholder="ဥပမာ — စာအုပ်ဟောင်းမှ ပြန်ထည့်ခြင်း"></div>
        <div class="field full">
   <button
@@ -2561,7 +2561,7 @@ historicalAdvanceLockHeader(false);
   form.reset();
 
   masterEl('historicalAdvanceOpeningDate').value = openBusinessDate;
-  masterEl('historicalAdvanceMonthlyRate').value = '3';
+  masterEl('historicalAdvanceMonthlyRate').value = '4';
 
   historicalAdvanceManualAttempted = false;
 
