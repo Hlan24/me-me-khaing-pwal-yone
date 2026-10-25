@@ -1297,6 +1297,14 @@ let canFullEdit =
         >
           ပြင်ရန်
         </button>
+        <button
+  class="btn"
+  type="button"
+  data-delete-historical-advance="${safeText(lot.serverId)}"
+  style="padding:6px 10px;margin-left:6px;color:#a11d2f"
+>
+  မှားစာရင်းဖျက်ရန်
+</button>
       `
       : `
         <span style="color:var(--muted)">
@@ -1577,10 +1585,10 @@ function cropById(id){return masterState.crops.find(row=>row.crop_type_id===id)}
 function renderFarmerMaster(){
   let query=(farmerSearch.value||'').trim().toLowerCase(),risk=farmerRiskFilter.value,rows=masterState.farmers.filter(row=>(risk==='all'||row.risk_level===risk)&&(!query||[row.customer_id,row.full_name,row.phone_normalized,row.phone_display,row.village,row.township].some(value=>String(value||'').toLowerCase().includes(query))));
   farmerTotal=masterState.farmers.length;farmerActive=masterState.farmers.filter(row=>row.active).length;farmerBlacklist=masterState.farmers.filter(row=>row.risk_level==='BLACKLISTED').length;farmerDebtTotal=masterState.farmers.reduce((sum,row)=>sum+Number(row.opening_debt_kyat||0),0);Object.keys(farmerDebt).forEach(key=>delete farmerDebt[key]);masterState.farmers.forEach(row=>{farmerDebt[row.customer_id]=Number(row.opening_debt_kyat||0)});updateFarmerDashboard();if(!masterEdit.farmer)farmerIdPreview.textContent='Server Auto';
-  farmerTableBody.innerHTML=rows.length?rows.map(row=>{let crop=cropById(row.primary_crop_type_id),riskClass='risk-'+String(row.risk_level||'LOW').toLowerCase(),status=row.active?'Active':'Inactive';return`<tr class="farmer-row" data-risk="${safeText(row.risk_level)}"><td><b>${safeText(row.customer_id)}</b></td><td><b>${safeText(row.full_name)}</b><small style="display:block;color:var(--muted)">${safeText(row.phone_display||row.phone_normalized||'ဖုန်းမရှိ')}</small></td><td>${safeText(row.village||'—')}<small style="display:block;color:var(--muted)">${safeText(row.township||'—')}</small></td><td>${mm(Number(row.acres||0))} ဧက<small style="display:block;color:var(--muted)">${safeText(crop?.name||'—')}</small></td><td>${signedMoney(Number(row.opening_debt_kyat||0))}</td><td><span class="risk-pill ${riskClass}">${safeText(row.risk_level)}</span><small style="display:block;margin-top:5px;color:${row.active?'#277448':'#a11d2f'}">${status}</small></td><td><button class="btn" type="button" data-edit-farmer="${safeText(row.customer_id)}">ပြင်ရန်</button><button class="btn" type="button" data-delete-customer="${safeText(row.customer_id)}" onclick="deleteCustomer('${row.customer_id}')">ဖျက်ရန်</button></td></tr>`}).join(''):'<tr><td colspan="7" class="master-empty">ကိုက်ညီသော တောင်သူမရှိပါ</td></tr>';
+  farmerTableBody.innerHTML=rows.length?rows.map(row=>{let crop=cropById(row.primary_crop_type_id),riskClass='risk-'+String(row.risk_level||'LOW').toLowerCase(),status=row.active?'Active':'Inactive';return`<tr class="farmer-row" data-risk="${safeText(row.risk_level)}"><td><b>${safeText(row.customer_id)}</b></td><td><b>${safeText(row.full_name)}</b><small style="display:block;color:var(--muted)">${safeText(row.phone_display||row.phone_normalized||'ဖုန်းမရှိ')}</small></td><td>${safeText(row.village||'—')}<small style="display:block;color:var(--muted)">${safeText(row.township||'—')}</small></td><td>${mm(Number(row.acres||0))} ဧက<small style="display:block;color:var(--muted)">${safeText(crop?.name||'—')}</small></td><td>${signedMoney(Number(row.opening_debt_kyat||0))}</td><td><span class="risk-pill ${riskClass}">${safeText(row.risk_level)}</span><small style="display:block;margin-top:5px;color:${row.active?'#277448':'#a11d2f'}">${status}</small></td><td><button class="btn" type="button" data-edit-farmer="${safeText(row.customer_id)}">ပြင်ရန်</button><button class="btn" type="button" data-remove-farmer="${safeText(row.customer_id)}" ${masterRoleIn(['owner'])?'':'disabled'}>ဖျက်/ပိတ်ရန်</button></td></tr>`}).join(''):'<tr><td colspan="7" class="master-empty">ကိုက်ညီသော တောင်သူမရှိပါ</td></tr>';
 }
 function renderCropMaster(){let can=masterCanCatalog();cropCatalogCount.textContent='('+mm(masterState.crops.length)+')';cropCatalogBody.innerHTML=masterState.crops.length?masterState.crops.map(row=>`<tr class="crop-row"><td><b>${safeText(row.crop_type_id)}</b></td><td>${safeText(row.name)}<small style="display:block;color:var(--muted)">${row.active?'Active':'Inactive'}</small></td><td>${row.category==='CHILI'?'ငရုတ်':row.category==='BEAN'?'ပဲ':'အခြား'}</td><td>${Number(row.pricing_divisor_pyitha)===1?'တစ်ပိဿာ':mm(Number(row.pricing_divisor_pyitha))+' ပိဿာ'}</td><td>${viss(Number(row.default_tare_centi_pyitha||0))} ပိဿာ</td><td><button class="btn" type="button" data-edit-crop="${safeText(row.crop_type_id)}" ${can?'':'disabled'}>ပြင်ရန်</button></td></tr>`).join(''):'<tr><td colspan="6" class="master-empty">သီးနှံ Master မရှိသေးပါ</td></tr>';let header=cropCatalogBody.closest('table')?.querySelector('thead tr');if(header&&!header.querySelector('[data-master-action-head]'))header.insertAdjacentHTML('beforeend','<th data-master-action-head>လုပ်ဆောင်ချက်</th>')}
-function renderProductMaster(){let totals=openingProductTotals(),can=masterCanCatalog();productCatalogCount.textContent='('+mm(masterState.products.length)+')';productCatalogBody.innerHTML=masterState.products.length?masterState.products.map(row=>{let stock=totals.get(row.product_id)||0,reorder=Number(row.reorder_level||0);return`<tr class="product-row"><td><b>${safeText(row.product_id)}</b></td><td>${safeText(row.name)}<small style="display:block;color:var(--muted)">${row.active?'Active':'Inactive'}</small></td><td>${safeText(row.category)}</td><td>${safeText(row.unit_name)}${row.whole_units_only?' · ကိန်းပြည့်':''}</td><td>${signedMoney(Number(row.default_unit_price_kyat||0))}</td><td class="${stock<=reorder?'stock-low':'stock-ok'}">${mm(stock)} ${safeText(row.unit_name)}</td><td><button class="btn" type="button" data-edit-product="${safeText(row.product_id)}" ${can?'':'disabled'}>ပြင်ရန်</button></td></tr>`}).join(''):'<tr><td colspan="7" class="master-empty">ကုန်ပစ္စည်း Master မရှိသေးပါ</td></tr>';let header=productCatalogBody.closest('table')?.querySelector('thead tr');if(header&&!header.querySelector('[data-master-action-head]'))header.insertAdjacentHTML('beforeend','<th data-master-action-head>လုပ်ဆောင်ချက်</th>')}
+function renderProductMaster(){let totals=openingProductTotals(),can=masterCanCatalog();productCatalogCount.textContent='('+mm(masterState.products.length)+')';productCatalogBody.innerHTML=masterState.products.length?masterState.products.map(row=>{let stock=totals.get(row.product_id)||0,reorder=Number(row.reorder_level||0);return`<tr class="product-row"><td><b>${safeText(row.product_id)}</b></td><td>${safeText(row.name)}<small style="display:block;color:var(--muted)">${row.active?'Active':'Inactive'}</small></td><td>${safeText(row.category)}</td><td>${safeText(row.unit_name)}${row.whole_units_only?' · ကိန်းပြည့်':''}</td><td>${signedMoney(Number(row.default_unit_price_kyat||0))}</td><td class="${stock<=reorder?'stock-low':'stock-ok'}">${mm(stock)} ${safeText(row.unit_name)}</td><td><button class="btn" type="button" data-remove-product="${safeText(row.product_id)}" ${masterRoleIn(['owner'])?'':'disabled'}>ဖျက်/ပိတ်ရန်</button></td></tr>`}).join(''):'<tr><td colspan="7" class="master-empty">ကုန်ပစ္စည်း Master မရှိသေးပါ</td></tr>';let header=productCatalogBody.closest('table')?.querySelector('thead tr');if(header&&!header.querySelector('[data-master-action-head]'))header.insertAdjacentHTML('beforeend','<th data-master-action-head>လုပ်ဆောင်ချက်</th>')}
 function renderLocationMaster(){let can=masterCanCatalog(),body=masterEl('stockLocationMasterBody');body.innerHTML=masterState.locations.length?masterState.locations.map(row=>`<tr><td><b>${safeText(row.location_id)}</b></td><td>${safeText(row.name)}</td><td>${row.location_type==='WAREHOUSE'?'ဂိုဒေါင်':row.location_type==='SHOP'?'ဆိုင်':'အခြား'}</td><td><span class="pill ${row.active?'':'red'}">${row.active?'Active':'Inactive'}</span></td><td><button class="btn" type="button" data-edit-location="${safeText(row.location_id)}" ${can?'':'disabled'}>ပြင်ရန်</button></td></tr>`).join(''):'<tr><td colspan="5" class="master-empty">Stock Location မရှိသေးပါ</td></tr>'}
 function renderStaffMaster(){let body=masterEl('staffRoleMasterBody'),can=masterCanStaff();body.innerHTML=masterState.staff.length?masterState.staff.map(row=>`<tr data-staff-user="${safeText(row.user_id)}"><td><b>${safeText(row.email||'Email မရှိ')}</b><small style="display:block;color:var(--muted)">${row.user_id===supabaseSessionUser?.id?'လက်ရှိ Login':'Staff account'}</small></td><td><div class="staff-row-controls"><input data-staff-name maxlength="120" value="${safeText(row.display_name||'ဝန်ထမ်း')}" aria-label="Display name"><select data-staff-role aria-label="Role">${Object.entries(STAFF_ROLE_LABELS).map(([value,label])=>`<option value="${value}" ${row.role===value?'selected':''}>${label}</option>`).join('')}</select><label><input data-staff-active type="checkbox" ${row.active?'checked':''}> Active</label></div></td><td>${row.updated_at?new Date(row.updated_at).toLocaleString('my-MM'):'—'}</td><td><button class="btn primary" type="button" data-save-staff="${safeText(row.user_id)}" ${can?'':'disabled'}>သိမ်းရန်</button></td></tr>`).join(''):'<tr><td colspan="4" class="master-empty">ဤ Role ဖြင့် ဖတ်ခွင့်ရှိသော Staff မရှိပါ</td></tr>'}
 function openingTypeLabel(type){return type==='FARMER_ADVANCE'?'အရင်စိုက်ထုတ်စာရင်း':type==='FARMER_DEBT'?'တောင်သူ အဖွင့်အကြွေး':type==='PRODUCT_STOCK'?'ကုန်ပစ္စည်း အဖွင့် Stock':'ပဲ/ငရုတ် အဖွင့် Stock'}
@@ -2786,6 +2794,205 @@ finalizeDay.onclick=async()=>{renderDayClose();if(finalizeDay.disabled||cropOpsS
 
 function cropOpsRefreshWriteAccess(){let ready=cropOpsWriteReady(),message=!cropOpsOwnerReady()?'Owner Login လိုသည်':navigator.onLine===false?'Offline Read Copy · ငွေ/Stock မတင်ပါ':cropOpsState.day?.is_closed?'ယနေ့ Day Close ပိတ်ပြီး':cropOpsState.source!=='SERVER'?'Crop Operations Migration / Server ချိတ်ဆက်မှု စစ်ပါ':'Server Atomic Transaction ဖြင့် သိမ်းမည်';saveSale.disabled=!ready||cropOpsSaving.sale;for(let button of [saveSale,finalizeSettlement,finalizeChiliSettlement,saveConsignmentSettlement,finalizeDay])button.title=message;settlementCalculation();chiliCalculation();consignmentSettlementCalculation();renderDayClose()}
 syncWholesalePayment();
+// =========================================================
+// Safe Master Data / Historical Advance removal controls
+// =========================================================
+
+// တောင်သူ — မသုံးရသေးလျှင် အပြီးဖျက်၊ သုံးပြီးသားဆို Inactive
+farmerTableBody.addEventListener('click', event => {
+  const button = event.target.closest('[data-remove-farmer]');
+  if (!button) return;
+
+  const customerId = button.dataset.removeFarmer;
+  const farmer = masterState.farmers.find(
+    row => row.customer_id === customerId
+  );
+
+  if (!farmer) {
+    liveMessage('ဖျက်မည့် တောင်သူကို မတွေ့ပါ');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    farmer.customer_id + ' · ' + farmer.full_name +
+    '\n\nမသုံးရသေးသော တောင်သူဆို အပြီးဖျက်ပါမည်။' +
+    '\nစာရင်းဟောင်းများတွင် သုံးပြီးသားဆို Inactive လုပ်ပါမည်။' +
+    '\n\nဆက်လုပ်မည်လား?'
+  );
+
+  if (!confirmed) return;
+
+  masterWithSaving(button, async () => {
+    masterAssertOnline(['owner']);
+
+    const { data, error } = await supabaseClient.rpc(
+      'remove_or_deactivate_farmer',
+      {
+        p_customer_id: customerId
+      }
+    );
+
+    if (error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+
+    await loadMasterData({ quiet: true });
+
+    toast.textContent =
+      result?.action === 'DELETED'
+        ? '✓ ' + farmer.full_name + ' ကို အပြီးဖျက်ပြီးပါပြီ'
+        : '✓ ' + farmer.full_name +
+          ' ကို စာရင်းဟောင်းမပျက်အောင် Inactive လုပ်ပြီးပါပြီ';
+
+    showToast();
+  });
+});
+
+
+// ကုန်ပစ္စည်း — မသုံးရသေးလျှင် အပြီးဖျက်၊ သုံးပြီးသားဆို Inactive
+productCatalogBody.addEventListener('click', event => {
+  const button = event.target.closest('[data-remove-product]');
+  if (!button) return;
+
+  const productId = button.dataset.removeProduct;
+  const product = masterState.products.find(
+    row => row.product_id === productId
+  );
+
+  if (!product) {
+    liveMessage('ဖျက်မည့် ကုန်ပစ္စည်းကို မတွေ့ပါ');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    product.product_id + ' · ' + product.name +
+    '\n\nမသုံးရသေးသော ပစ္စည်းဆို အပြီးဖျက်ပါမည်။' +
+    '\nStock/အကြွေး/အရောင်းစာရင်းတွင် သုံးပြီးသားဆို Inactive လုပ်ပါမည်။' +
+    '\n\nဆက်လုပ်မည်လား?'
+  );
+
+  if (!confirmed) return;
+
+  masterWithSaving(button, async () => {
+    masterAssertOnline(['owner']);
+
+    const { data, error } = await supabaseClient.rpc(
+      'remove_or_deactivate_product',
+      {
+        p_product_id: productId
+      }
+    );
+
+    if (error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+
+    await loadMasterData({ quiet: true });
+
+    toast.textContent =
+      result?.action === 'DELETED'
+        ? '✓ ' + product.name + ' ကို အပြီးဖျက်ပြီးပါပြီ'
+        : '✓ ' + product.name +
+          ' ကို စာရင်းဟောင်းမပျက်အောင် Inactive လုပ်ပြီးပါပြီ';
+
+    showToast();
+  });
+});
+
+
+// မှားထည့်ထားသော အရင်စိုက်ထုတ်အကြွေးကို Audit မှတ်တမ်းနှင့် ဖျက်ရန်
+advanceLedgerBody.addEventListener('click', async event => {
+  const button = event.target.closest(
+    '[data-delete-historical-advance]'
+  );
+
+  if (!button) return;
+
+  if (!financeWriteReady()) {
+    liveMessage(
+      'Owner Login ဝင်ပြီး Server Live ဖြစ်မှ မှားစာရင်းဖျက်နိုင်သည်'
+    );
+    return;
+  }
+
+  const lot = advanceLots.find(
+    item =>
+      item.serverId === button.dataset.deleteHistoricalAdvance
+  );
+
+  if (!lot) {
+    liveMessage('ဖျက်မည့် စိုက်ထုတ်အကြွေးစာရင်းကို မတွေ့ပါ');
+    return;
+  }
+
+  const enteredReason = window.prompt(
+    lot.id +
+    '\n' +
+    lot.farmerName +
+    '\n' +
+    formatAdvanceDate(lot.issuedDate) +
+    '\n' +
+    signedMoney(lot.originalPrincipal) +
+    '\n\nဖျက်ရသည့်အကြောင်းပြချက် ရေးပါ',
+    'မှားယွင်းထည့်သွင်းထားသော စာရင်း'
+  );
+
+  if (enteredReason === null) return;
+
+  const reason = enteredReason.trim();
+
+  if (!reason) {
+    liveMessage('ဖျက်ရသည့်အကြောင်းပြချက် ထည့်ပါ');
+    return;
+  }
+
+  if (reason.length > 500) {
+    liveMessage('အကြောင်းပြချက် စာလုံး ၅၀၀ ထက် မကျော်ရပါ');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    lot.id +
+    ' · ' +
+    lot.farmerName +
+    '\nထုတ်ပေးသည့်ရက် — ' +
+    formatAdvanceDate(lot.issuedDate) +
+    '\nအရင်း — ' +
+    signedMoney(lot.originalPrincipal) +
+    '\n\nဤစာရင်းကို အမှန်တကယ် ဖျက်မည်လား?' +
+    '\nဖျက်ထားမှုကို Audit Log တွင် ဆက်လက်မှတ်တမ်းတင်ထားပါမည်။'
+  );
+
+  if (!confirmed) return;
+
+  const originalLabel = button.textContent;
+
+  button.disabled = true;
+  button.textContent = 'ဖျက်နေသည်…';
+
+  try {
+    const result = await financeRpc(
+      'delete_untouched_historical_advance',
+      {
+        p_advance_lot_id: lot.serverId,
+        p_reason: reason
+      }
+    );
+
+    await financeReloadAfterWrite();
+
+    liveMessage(
+      '✓ ' +
+      (result?.advance_ref || lot.id) +
+      ' · မှားထည့်ထားသော စိုက်ထုတ်အကြွေးကို ဖျက်ပြီး Audit Log တွင် မှတ်တမ်းတင်ပြီး'
+    );
+  } catch (error) {
+    liveMessage(financeFriendlyError(error));
+  } finally {
+    button.disabled = false;
+    button.textContent = originalLabel;
+  }
+});
 const PILOT_LOCKED_WRITE_IDS=[];
 function pilotWriteLockedMessage(){toast.textContent='🔒 ဤလုပ်ငန်းသည် နောက်အဆင့် Server Ledger မချိတ်ရသေး၍ အမှန်စာရင်း မတင်နိုင်သေးပါ · Master Data ကို Master Data စာမျက်နှာမှ အမှန်သိမ်းနိုင်သည်';showToast()}
 function applyPilotWriteGuards(){PILOT_LOCKED_WRITE_IDS.forEach(id=>{let element=document.getElementById(id);if(!element)return;element.dataset.pilotWrite='locked';element.setAttribute('aria-disabled','true');element.title='Server Database မချိတ်ရသေးသဖြင့် Live Pilot တွင် Write Lock ထားသည်';if(element.matches('button'))element.disabled=true;if(element.matches('form'))element.querySelectorAll('button[type="submit"],input[type="submit"]').forEach(button=>{button.dataset.pilotWrite='locked';button.setAttribute('aria-disabled','true');button.disabled=true;button.title=element.title})})}
@@ -2794,49 +3001,4 @@ document.addEventListener('submit',event=>{if(event.target.matches?.('[data-pilo
 document.querySelectorAll('[data-save]').forEach(x=>x.onclick=showToast);
 let initialToday=todayIso();advanceDate.value=initialToday;advanceDate.min=initialToday;advanceDate.max=initialToday;repayDate.value=initialToday;repayDate.min=initialToday;repayDate.max=initialToday;applyProductDefaults();syncInputSaleProducts(true);syncInputSaleReference();loan();initializeConsignmentUi();renderBags();renderOperations();applyPilotWriteGuards();initializeMarketPriceModule().catch(error=>{setMarketValidation('PC Local ဈေးနှုန်းမှတ်တမ်း ဖွင့်မရပါ · '+String(error?.message||error));console.error('Market price initialization failed',error)});initializeWeighingOfflineQueue().then(()=>initializeSupabaseIntegration()).catch(error=>{setSupabaseState('ERROR',supabaseFriendlyError(error));console.error('Weighing/Supabase initialization failed',error)});
 
-// function deleteCustomer(customerId) {
-//   if (confirm("ဒီတောင်သူစာရင်းကို အမှန်တကယ် ဖျက်မှာ သေချာပါသလား။")) {
-//     if (typeof supabase !== 'undefined') {
-//       supabase
-//         .from('farmers') // မိမိသုံးထားသော Database Table နာမည် (customers သို့မဟုတ် farmers)
-//         .delete()
-//         .eq('customer_id', customerId)
-//         .then(({ error }) => {
-//           if (error) {
-//             alert("ဖျက်ရာတွင် အမှား ရှိနေပါသည်: " + error.message);
-//           } else {
-//             alert("တောင်သူစာရင်းကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။");
-//             location.reload(); // စာရင်းဇယားကို Refresh လုပ်ပေးရန်
-//           }
-//         });
-//     } else {
-//       alert("Database ချိတ်ဆက်မှု မတွေ့ပါ။");
-//     }
-//   }
-// }
-
-function deleteCustomer(customerId) {
-  // ၁။ ID တကယ် ရ မရ စစ်ရန်
-  alert("ဖျက်မည့် တောင်သူ ID: " + customerId);
-
-  if (confirm("ဒီတောင်သူစာရင်းကို အမှန်တကယ် ဖျက်မှာ သေချာပါသလား။")) {
-    if (typeof supabase !== 'undefined') {
-      supabase
-        .from('farmers')
-        .delete()
-        .eq('customer_id', customerId)
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Supabase Error:", error);
-            alert("Supabase Error တက်နေပါသည်: " + error.message);
-          } else {
-            alert("ဖျက်ပြီးပါပြီ။");
-            location.reload();
-          }
-        });
-    } else {
-      alert("Supabase Client ကို ရှာမတွေ့ပါ။ (undefined ဖြစ်နေပါသည်)");
-    }
-  }
-}
 </script></body></html>
