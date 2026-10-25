@@ -1455,14 +1455,40 @@ const advanceLotDetailCountEl =
 
 let selectedAdvanceFarmerId = '';
 
+function advanceCreatedStamp(value) {
+  const stamp = new Date(value || 0).getTime();
 
+  return Number.isFinite(stamp) ? stamp : 0;
+}
+
+
+function formatAdvanceCreatedAt(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+
+  return date.toLocaleString(
+    'en-GB',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }
+  );
+}
 function renderAdvanceLedger() {
   const sorted = [...advanceLots].sort(
-    (a, b) =>
-      b.issuedDate.localeCompare(a.issuedDate) ||
-      b.id.localeCompare(a.id)
-  );
-
+  (a, b) =>
+    advanceCreatedStamp(b.createdAt) -
+      advanceCreatedStamp(a.createdAt) ||
+    b.issuedDate.localeCompare(a.issuedDate) ||
+    b.id.localeCompare(a.id)
+);
   const openLots = sorted.filter(
     lot => refreshAdvanceStatus(lot) !== 'PAID'
   );
@@ -1470,43 +1496,52 @@ function renderAdvanceLedger() {
   const farmerGroups = new Map();
 
   for (const lot of openLots) {
-    let group = farmerGroups.get(lot.customerId);
+  let group = farmerGroups.get(lot.customerId);
 
-    if (!group) {
-      group = {
-        customerId: lot.customerId,
-        farmerName: lot.farmerName,
-        lotCount: 0,
-        cashPrincipal: 0,
-        goodsPrincipal: 0,
-        totalPrincipal: 0
-      };
+  if (!group) {
+    group = {
+      customerId: lot.customerId,
+      farmerName: lot.farmerName,
+      lotCount: 0,
+      cashPrincipal: 0,
+      goodsPrincipal: 0,
+      totalPrincipal: 0,
+      latestCreatedAt: lot.createdAt || null
+    };
 
-      farmerGroups.set(lot.customerId, group);
-    }
-
-    group.lotCount += 1;
-    group.totalPrincipal += Number(
-      lot.remainingPrincipal || 0
-    );
-
-    if (lot.type === 'GOODS') {
-      group.goodsPrincipal += Number(
-        lot.remainingPrincipal || 0
-      );
-    } else {
-      group.cashPrincipal += Number(
-        lot.remainingPrincipal || 0
-      );
-    }
+    farmerGroups.set(lot.customerId, group);
   }
 
-  const farmers = [...farmerGroups.values()].sort(
-    (a, b) =>
-      a.farmerName.localeCompare(b.farmerName) ||
-      a.customerId.localeCompare(b.customerId)
+  if (
+    advanceCreatedStamp(lot.createdAt) >
+    advanceCreatedStamp(group.latestCreatedAt)
+  ) {
+    group.latestCreatedAt = lot.createdAt;
+  }
+
+  group.lotCount += 1;
+
+  group.totalPrincipal += Number(
+    lot.remainingPrincipal || 0
   );
 
+  if (lot.type === 'GOODS') {
+    group.goodsPrincipal += Number(
+      lot.remainingPrincipal || 0
+    );
+  } else {
+    group.cashPrincipal += Number(
+      lot.remainingPrincipal || 0
+    );
+  }
+}
+  const farmers = [...farmerGroups.values()].sort(
+  (a, b) =>
+    advanceCreatedStamp(b.latestCreatedAt) -
+      advanceCreatedStamp(a.latestCreatedAt) ||
+    a.farmerName.localeCompare(b.farmerName) ||
+    a.customerId.localeCompare(b.customerId)
+);
   if (
     selectedAdvanceFarmerId &&
     !farmerGroups.has(selectedAdvanceFarmerId)
@@ -1530,8 +1565,15 @@ function renderAdvanceLedger() {
             <td>
               <div class="advance-farmer-name">
                 <b>${safeText(group.farmerName)}</b>
-                <small>${safeText(group.customerId)}</small>
-              </div>
+               <small>${safeText(group.customerId)}</small>
+
+<small>
+  နောက်ဆုံးထည့် —
+  ${safeText(
+    formatAdvanceCreatedAt(group.latestCreatedAt)
+  )}
+</small>
+               </div>
             </td>
 
             <td>
@@ -1640,8 +1682,17 @@ function renderAdvanceLedger() {
               </td>
 
               <td>
-                ${formatAdvanceDate(lot.issuedDate)}
-              </td>
+  ${formatAdvanceDate(lot.issuedDate)}
+
+  <small
+    style="display:block;margin-top:4px;color:var(--muted);white-space:nowrap"
+  >
+    ထည့်သွင်း —
+    ${safeText(
+      formatAdvanceCreatedAt(lot.createdAt)
+    )}
+  </small>
+</td>
 
               <td>
                 ${safeText(typeLabel)}
