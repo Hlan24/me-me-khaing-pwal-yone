@@ -36,6 +36,121 @@
     @media(max-width:720px){#wholesaleSalePanel .ops-calc{grid-template-columns:repeat(2,minmax(0,1fr))}}
     /* The paper voucher layout is defined in #voucher-print-styles below. */
     .settlement-prerequisite{padding:12px 14px;font-size:11px;line-height:1.8}
+
+    /* Farmer-first advance ledger */
+.advance-farmer-summary {
+  margin-top: 14px;
+}
+
+.advance-farmer-summary table {
+  min-width: 720px !important;
+}
+
+.advance-farmer-row {
+  cursor: pointer;
+  transition: background-color .16s ease;
+}
+
+.advance-farmer-row:hover {
+  background: #fff4f1;
+}
+
+.advance-farmer-row td {
+  vertical-align: middle;
+}
+
+.advance-farmer-name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.advance-farmer-name b {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.advance-farmer-name small {
+  color: var(--muted);
+}
+
+.advance-lot-detail-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffaf8;
+}
+
+.advance-lot-detail-head h3 {
+  flex: 1;
+  min-width: 180px;
+  margin: 0;
+}
+
+.advance-lot-detail-head small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+}
+
+.advance-ledger-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 190px;
+}
+
+.advance-ledger-actions .btn {
+  width: auto;
+  margin: 0 !important;
+  padding: 7px 10px !important;
+  white-space: nowrap;
+}
+
+.advance-ledger-actions .delete-action {
+  color: #a11d2f;
+  border-color: #d9a6ab;
+  background: #fff7f5;
+}
+
+#advanceFarmerSummaryPanel[hidden],
+#advanceLotDetailPanel[hidden] {
+  display: none !important;
+}
+
+#advanceLotDetailPanel .advance-table-wrap table {
+  min-width: 1020px;
+}
+
+@media (max-width: 800px) {
+  .advance-farmer-summary table {
+    min-width: 650px !important;
+  }
+
+  .advance-lot-detail-head {
+    align-items: stretch;
+  }
+
+  .advance-lot-detail-head .btn {
+    width: 100%;
+  }
+
+  .advance-ledger-actions {
+    min-width: 150px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .advance-ledger-actions .btn {
+    width: 100%;
+  }
+}
   </style>
   <style id="master-data-styles">
     .master-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:11px}.master-status strong{font-size:12px}.master-status .master-sync{margin-left:auto}.master-sync{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:20px;background:#fff3db;color:#98651a;font-size:10px}.master-sync.live{background:#e8f4eb;color:#277448}.master-sync.error{background:#fdebe7;color:#a11d2f}.master-grid{display:grid;grid-template-columns:minmax(280px,.75fr) minmax(420px,1.25fr);gap:16px;align-items:start}.master-form{display:grid;gap:12px}.master-form .form-actions{display:flex;justify-content:flex-end;gap:8px}.master-table-wrap{overflow:auto;max-height:590px}.master-table{min-width:760px}.master-table th{position:sticky;top:0;background:#fff;z-index:1}.master-table .btn{padding:6px 9px;font-size:9px}.master-muted{color:var(--muted);font-size:10px;line-height:1.7}.master-inline-note{background:#fff0ee;border-left:4px solid var(--green);padding:10px 12px;border-radius:9px;color:var(--muted);font-size:10px;line-height:1.7}.master-editing{display:none;background:#fff3db;color:#98651a;border-radius:8px;padding:8px 10px;font-size:10px}.master-editing.show{display:block}.master-active-toggle{display:flex;align-items:center;gap:8px;min-height:42px}.master-active-toggle input{width:18px;height:18px;accent-color:var(--green)}.staff-row-controls{display:flex;gap:7px;align-items:center;min-width:330px}.staff-row-controls input,.staff-row-controls select{padding:7px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.staff-row-controls input{flex:1}.staff-row-controls select{width:125px}.staff-row-controls label{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:10px}.opening-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}.opening-step{background:#fff0ee;border-radius:11px;padding:11px}.opening-step small{display:block;color:var(--muted);font-size:8px}.opening-step b{display:block;margin-top:4px;font-size:11px}.opening-input-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.opening-input-grid .full{grid-column:1/-1}.opening-textarea{width:100%;min-height:190px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:12px;font:11px/1.7 Consolas,'Noto Sans Myanmar',sans-serif}.opening-textarea:focus{outline:2px solid #eebdc2;border-color:var(--green)}.opening-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.opening-file{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.opening-result{display:none;border-radius:10px;padding:11px 12px;margin-top:12px;font-size:10px;line-height:1.7}.opening-result.show{display:block}.opening-result.ok{background:#e8f4eb;color:#236c42}.opening-result.error{background:#fdebe7;color:#a11d2f}.opening-preview{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}.opening-preview table{min-width:760px}.opening-preview .line-error{color:#a11d2f}.opening-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.opening-summary div{background:#fff0ee;border-radius:10px;padding:10px}.opening-summary small{display:block;color:var(--muted);font-size:8px}.opening-summary b{font:700 14px Manrope}.master-empty{text-align:center;color:var(--muted);padding:28px 12px!important}.master-actions{display:flex;gap:7px;flex-wrap:wrap}.master-danger{color:#a11d2f}.master-offline{background:#fff3db;color:#98651a;padding:9px 11px;border-radius:9px;font-size:10px}.master-panel-head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.master-import-history{margin-top:18px}.master-import-history table{min-width:820px}
@@ -332,8 +447,98 @@ active          BOOLEAN</code></div></div>
       </div>
 
       <div class="panel advance-ledger" id="advanceLedgerPanel">
-        <div class="panel-head"><div><h3>စိုက်ထုတ်လက်ကျန် တစ်ကြိမ်ချင်း</h3><span style="font-size:11px;color:var(--muted)">မူလဈေးနှင့် မူလအတိုးနှုန်းကို နောက်မှမပြောင်းဘဲ သိမ်းထားသည်</span></div><span id="advanceLedgerCount" class="printer-status">၀ စာရင်း</span></div>
-        <div class="advance-table-wrap"><table><thead><tr><th>Advance ID</th><th>တောင်သူ</th><th>ထုတ်သည့်ရက်</th><th>အမျိုးအစား</th><th>မူလ</th><th>လက်ကျန်</th><th>လစဉ်နှုန်း</th><th>မှတ်ချက်</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ချက်</th></tr></thead><tbody id="advanceLedgerBody"></tbody></table></div>
+        <div class="panel-head">
+  <div>
+    <h3>အကြွေးလက်ကျန် — တောင်သူအလိုက်</h3>
+    <span style="font-size:11px;color:var(--muted)">
+      တောင်သူကိုနှိပ်ပြီး အဲဒီတောင်သူ၏ စိုက်ထုတ် Lot များကို သီးသန့်ကြည့်ပါ
+    </span>
+  </div>
+
+  <span id="advanceLedgerCount" class="printer-status">
+    ၀ တောင်သူ
+  </span>
+</div>
+
+<div
+  id="advanceFarmerSummaryPanel"
+  class="advance-farmer-summary"
+>
+  <div class="advance-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>တောင်သူ</th>
+          <th>လက်ကျန် Lot</th>
+          <th>ငွေသားအကြွေး</th>
+          <th>ပစ္စည်းအကြွေး</th>
+          <th>စုစုပေါင်းလက်ကျန်</th>
+          <th>လုပ်ဆောင်ချက်</th>
+        </tr>
+      </thead>
+
+      <tbody id="advanceFarmerSummaryBody">
+        <tr>
+          <td
+            colspan="6"
+            style="text-align:center;color:var(--muted)"
+          >
+            အကြွေးလက်ကျန်ရှိသော တောင်သူ မရှိသေးပါ
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="advanceLotDetailPanel" hidden>
+  <div class="advance-lot-detail-head">
+    <button
+      class="btn"
+      id="advanceLotBack"
+      type="button"
+    >
+      ← တောင်သူစာရင်းသို့ ပြန်ရန်
+    </button>
+
+    <div>
+      <h3 id="advanceLotFarmerTitle">
+        တောင်သူ၏ စိုက်ထုတ် Lot များ
+      </h3>
+
+      <small>
+        မူလတန်ဖိုး၊ လက်ကျန်နှင့် အတိုးနှုန်းကို Lot တစ်ခုချင်းပြသည်
+      </small>
+    </div>
+
+    <span
+      id="advanceLotDetailCount"
+      class="printer-status"
+    >
+      ၀ Lot
+    </span>
+  </div>
+
+  <div class="advance-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Advance ID</th>
+          <th>ထုတ်သည့်ရက်</th>
+          <th>အမျိုးအစား</th>
+          <th>မူလ</th>
+          <th>လက်ကျန်</th>
+          <th>လစဉ်နှုန်း</th>
+          <th>မှတ်ချက်</th>
+          <th>အခြေအနေ</th>
+          <th>လုပ်ဆောင်ချက်</th>
+        </tr>
+      </thead>
+
+      <tbody id="advanceLedgerBody"></tbody>
+    </table>
+  </div>
+</div>
         <div class="panel-head" style="margin-top:24px"><h3>နောက်ဆုံး ပြန်ဆပ်ထားမှု</h3><small style="color:var(--muted)">အရင်းနှင့် အတိုးကို သီးခြားပြထားသည်</small></div>
         <div class="advance-table-wrap"><table><thead><tr><th>RP / Offset Ref</th><th>ရက်</th><th>တောင်သူ</th><th>ရှင်းသည့်အရာ</th><th>အရင်း</th><th>အတိုး</th><th>လက်ခံ/ဖြတ်ငွေ</th><th>လက်ကျန်</th></tr></thead><tbody id="advanceRepaymentBody"><tr><td colspan="8" style="text-align:center;color:var(--muted)">ပြန်ဆပ်ထားမှု မရှိသေးပါ</td></tr></tbody></table></div>
       </div>
@@ -1230,101 +1435,326 @@ function syncRepaymentFarmers(){let current=repayAdvanceFarmer.value,farmerMap=n
 function syncRepaymentLots(){let customerId=(repayAdvanceFarmer.value||'').split('|')[0],lots=openAdvanceLots(customerId),current=repayAdvanceLot.value;repayAdvanceLot.innerHTML=lots.length?lots.map(lot=>`<option value="${safeText(lot.id)}">${safeText(lot.id+' · '+lot.issuedDate+' · '+lot.itemName+' · '+advanceLotDescription(lot))}</option>`).join(''):'<option value="">ဆပ်ရန် လက်ကျန်မရှိပါ</option>';repayAdvanceLot.disabled=!lots.length;if(lots.some(lot=>lot.id===current))repayAdvanceLot.value=current;let selected=repayAdvanceLot.value,changed=repayAdvanceLot.dataset.activeLot!==selected;prepareRepaymentLot(changed)}
 function prepareRepaymentLot(resetAmount=false){let lot=advanceLots.find(item=>item.id===repayAdvanceLot.value);repayAdvanceLot.dataset.activeLot=lot?.id||'';repayGoodsField.classList.toggle('hidden',!lot||lot.type!=='GOODS');repayCashField.classList.toggle('hidden',!lot||lot.type!=='CASH');repayDate.min=todayIso();if(lot){repayQty.min=lot.wholeUnits?'1':'0.001';repayQty.step=lot.wholeUnits?'1':'0.001'}if(lot&&resetAmount){if(lot.type==='GOODS')repayQty.value=String(Math.min(1,lot.remainingQty));else repayPrincipal.value=String(Math.min(100000,lot.remainingPrincipal))}repaymentCalculation()}
 function repaymentCalculation(){let lot=advanceLots.find(item=>item.id===repayAdvanceLot.value),paymentDate=repayDate.value,errors=[],days=0,selectedPrincipal=0,selectedQty=null,remainingPrincipal=0,remainingQty=null;if(!lot)errors.push('ရွေးထားသောတောင်သူတွင် ဆပ်ရန် စိုက်ထုတ်လက်ကျန်မရှိပါ');if(lot){let issueStamp=dateSerial(lot.issuedDate),paymentStamp=dateSerial(paymentDate),todayStamp=dateSerial(todayIso());if(!Number.isFinite(paymentStamp))errors.push('ဆပ်သည့်ရက်ကို ရွေးပါ');else{if(paymentStamp<issueStamp)errors.push('ဆပ်သည့်ရက်သည် ထုတ်ပေးသည့်ရက် မတိုင်မီ မဖြစ်ရပါ');if(paymentStamp!==todayStamp)errors.push('ငွေစာရင်းတင်သည့်ရက်ကို ယနေ့ Business Date ဖြင့်သာ ထည့်ပါ')}days=Number.isFinite(paymentStamp)?elapsedDays(lot.issuedDate,paymentDate):0;if(lot.type==='GOODS'){selectedQty=Number(repayQty.value);if(!Number.isFinite(selectedQty)||selectedQty<=0)errors.push('ယခုဆပ်မည့် ပစ္စည်းအရေအတွက်ကို သုညထက်ကြီးအောင် ထည့်ပါ');if(Number.isFinite(selectedQty)&&selectedQty>lot.remainingQty+0.0001)errors.push('ယခုဆပ်မည့်အရေအတွက်သည် လက်ကျန် '+mm(lot.remainingQty)+' '+lot.unit+' ထက် မကျော်ရပါ');let closesLot=Number.isFinite(selectedQty)&&Math.abs(selectedQty-lot.remainingQty)<=0.0001;selectedPrincipal=Number.isFinite(selectedQty)?(closesLot?lot.remainingPrincipal:Math.round(selectedQty*lot.unitPrice)):0;if(selectedPrincipal>lot.remainingPrincipal)errors.push('ရွေးထားသော ပစ္စည်းတန်ဖိုးသည် လက်ကျန်အရင်းထက် မကျော်ရပါ');remainingQty=Math.max(0,lot.remainingQty-(Number.isFinite(selectedQty)?selectedQty:0));remainingPrincipal=Math.max(0,lot.remainingPrincipal-selectedPrincipal)}else{selectedPrincipal=Math.round(Number(repayPrincipal.value));if(!Number.isFinite(selectedPrincipal)||selectedPrincipal<=0)errors.push('ယခုဆပ်မည့် အရင်းငွေကို သုညထက်ကြီးအောင် ထည့်ပါ');if(Number.isFinite(selectedPrincipal)&&selectedPrincipal>lot.remainingPrincipal)errors.push('ယခုဆပ်မည့်အရင်းသည် လက်ကျန်အရင်းထက် မကျော်ရပါ');remainingPrincipal=Math.max(0,lot.remainingPrincipal-(Number.isFinite(selectedPrincipal)?selectedPrincipal:0))}}selectedPrincipal=Math.max(0,selectedPrincipal||0);let halfMonthSteps=advanceInterestHalfMonthSteps(days),monthUnits=halfMonthSteps/2,interest=lot?simpleAdvanceInterest(selectedPrincipal,lot.monthlyRate,days):0,total=selectedPrincipal+interest;repayIssueOutput.textContent=lot?formatAdvanceDate(lot.issuedDate):'—';repayDaysOutput.textContent=mm(days)+' ရက် · '+advanceInterestPeriodLabel(days);repayPrincipalOutput.textContent=signedMoney(selectedPrincipal);repayInterestOutput.textContent=signedMoney(interest);repayTotalOutput.textContent=signedMoney(total);repayRemainingOutput.textContent=lot?(lot.type==='GOODS'?mm(Math.max(0,remainingQty))+' '+lot.unit+' / '+signedMoney(Math.max(0,remainingPrincipal)):signedMoney(Math.max(0,remainingPrincipal))):'—';repayValidation.style.display=errors.length?'block':'none';repayValidation.innerHTML=errors.map(error=>'• '+safeText(error)).join('<br>');let valid=Boolean(lot)&&errors.length===0&&selectedPrincipal>0;saveAdvanceRepayment.disabled=dayClosed||!valid||repaymentSaving;return{valid,lot,paymentDate,days,halfMonthSteps,monthUnits,selectedQty,selectedPrincipal,interest,total,remainingPrincipal,remainingQty,errors}}
+const advanceFarmerSummaryPanelEl =
+  document.getElementById('advanceFarmerSummaryPanel');
+
+const advanceFarmerSummaryBodyEl =
+  document.getElementById('advanceFarmerSummaryBody');
+
+const advanceLotDetailPanelEl =
+  document.getElementById('advanceLotDetailPanel');
+
+const advanceLotBackEl =
+  document.getElementById('advanceLotBack');
+
+const advanceLotFarmerTitleEl =
+  document.getElementById('advanceLotFarmerTitle');
+
+const advanceLotDetailCountEl =
+  document.getElementById('advanceLotDetailCount');
+
+let selectedAdvanceFarmerId = '';
+
+
 function renderAdvanceLedger() {
-  let sorted = [...advanceLots].sort(
+  const sorted = [...advanceLots].sort(
     (a, b) =>
       b.issuedDate.localeCompare(a.issuedDate) ||
       b.id.localeCompare(a.id)
   );
 
-  let openCount = sorted.filter(
+  const openLots = sorted.filter(
+    lot => refreshAdvanceStatus(lot) !== 'PAID'
+  );
+
+  const farmerGroups = new Map();
+
+  for (const lot of openLots) {
+    let group = farmerGroups.get(lot.customerId);
+
+    if (!group) {
+      group = {
+        customerId: lot.customerId,
+        farmerName: lot.farmerName,
+        lotCount: 0,
+        cashPrincipal: 0,
+        goodsPrincipal: 0,
+        totalPrincipal: 0
+      };
+
+      farmerGroups.set(lot.customerId, group);
+    }
+
+    group.lotCount += 1;
+    group.totalPrincipal += Number(
+      lot.remainingPrincipal || 0
+    );
+
+    if (lot.type === 'GOODS') {
+      group.goodsPrincipal += Number(
+        lot.remainingPrincipal || 0
+      );
+    } else {
+      group.cashPrincipal += Number(
+        lot.remainingPrincipal || 0
+      );
+    }
+  }
+
+  const farmers = [...farmerGroups.values()].sort(
+    (a, b) =>
+      a.farmerName.localeCompare(b.farmerName) ||
+      a.customerId.localeCompare(b.customerId)
+  );
+
+  if (
+    selectedAdvanceFarmerId &&
+    !farmerGroups.has(selectedAdvanceFarmerId)
+  ) {
+    selectedAdvanceFarmerId = '';
+  }
+
+  advanceLedgerCount.textContent =
+    mm(farmers.length) +
+    ' တောင်သူ / ' +
+    mm(openLots.length) +
+    ' လက်ကျန် Lot';
+
+  advanceFarmerSummaryBodyEl.innerHTML =
+    farmers.length
+      ? farmers.map(group => `
+          <tr
+            class="advance-farmer-row"
+            data-view-advance-farmer="${safeText(group.customerId)}"
+          >
+            <td>
+              <div class="advance-farmer-name">
+                <b>${safeText(group.farmerName)}</b>
+                <small>${safeText(group.customerId)}</small>
+              </div>
+            </td>
+
+            <td>
+              <b>${mm(group.lotCount)} Lot</b>
+            </td>
+
+            <td>
+              ${signedMoney(group.cashPrincipal)}
+            </td>
+
+            <td>
+              ${signedMoney(group.goodsPrincipal)}
+            </td>
+
+            <td>
+              <b>${signedMoney(group.totalPrincipal)}</b>
+            </td>
+
+            <td>
+              <button
+                class="btn"
+                type="button"
+                data-view-advance-farmer="${safeText(group.customerId)}"
+              >
+                Lot ကြည့်ရန် →
+              </button>
+            </td>
+          </tr>
+        `).join('')
+      : `
+          <tr>
+            <td
+              colspan="6"
+              style="text-align:center;color:var(--muted)"
+            >
+              အကြွေးလက်ကျန်ရှိသော တောင်သူ မရှိသေးပါ
+            </td>
+          </tr>
+        `;
+
+  const selectedGroup = farmerGroups.get(
+    selectedAdvanceFarmerId
+  );
+
+  if (!selectedGroup) {
+    advanceFarmerSummaryPanelEl.hidden = false;
+    advanceLotDetailPanelEl.hidden = true;
+    advanceLedgerBody.innerHTML = '';
+    return;
+  }
+
+  advanceFarmerSummaryPanelEl.hidden = true;
+  advanceLotDetailPanelEl.hidden = false;
+
+  advanceLotFarmerTitleEl.textContent =
+    selectedGroup.customerId +
+    ' · ' +
+    selectedGroup.farmerName;
+
+  const selectedLots = sorted.filter(
+    lot => lot.customerId === selectedAdvanceFarmerId
+  );
+
+  const selectedOpenCount = selectedLots.filter(
     lot => refreshAdvanceStatus(lot) !== 'PAID'
   ).length;
 
-  advanceLedgerCount.textContent =
-    mm(openCount) + ' လက်ကျန် / ' +
-    mm(sorted.length) + ' စာရင်း';
+  advanceLotDetailCountEl.textContent =
+    mm(selectedOpenCount) +
+    ' လက်ကျန် / ' +
+    mm(selectedLots.length) +
+    ' Lot';
 
-  advanceLedgerBody.innerHTML = sorted.length
-    ? sorted.map(lot => {
-        let status = refreshAdvanceStatus(lot);
+  advanceLedgerBody.innerHTML =
+    selectedLots.length
+      ? selectedLots.map(lot => {
+          const status = refreshAdvanceStatus(lot);
 
-        let statusLabel =
-          status === 'OPEN'
-            ? 'ဖွင့်ထား'
-            : status === 'PARTIAL'
-              ? 'တစ်စိတ်တစ်ပိုင်းဆပ်ပြီး'
-              : 'အပြီးဆပ်ပြီး';
+          const statusLabel =
+            status === 'OPEN'
+              ? 'ဖွင့်ထား'
+              : status === 'PARTIAL'
+                ? 'တစ်စိတ်တစ်ပိုင်းဆပ်ပြီး'
+                : 'အပြီးဆပ်ပြီး';
 
-        let typeLabel =
-          lot.type === 'GOODS'
-            ? lot.itemName
-            : 'ငွေသား';
+          const typeLabel =
+            lot.type === 'GOODS'
+              ? lot.itemName
+              : 'ငွေသား';
 
-        let note = String(lot.note || '').trim();
-let hasRepayment = advanceRepayments.some(
-  payment => payment.advanceId === lot.id
-);
+          const note = String(lot.note || '').trim();
 
-let canFullEdit =
-  Boolean(lot.openingEntryId) &&
-  status === 'OPEN' &&
-  !hasRepayment;
-        return `
-          <tr>
-            <td><b>${safeText(lot.id)}</b></td>
-            <td>${safeText(lot.farmerName)}</td>
-            <td>${formatAdvanceDate(lot.issuedDate)}</td>
-            <td>${safeText(typeLabel)}</td>
-            <td>${safeText(advanceLotDescription(lot, false))}</td>
-            <td>${safeText(advanceLotDescription(lot, true))}</td>
-            <td>${mm(lot.monthlyRate)}%</td>
-            <td>${safeText(note || '—')}</td>
-            <td>
-              <span class="advance-status ${status.toLowerCase()}">
-                ${statusLabel}
-              </span>
-            </td>
-            <td>
-  ${
-    canFullEdit
-      ? `
-        <button
-          class="btn"
-          type="button"
-          data-edit-historical-advance="${safeText(lot.serverId)}"
-          style="padding:6px 10px"
-        >
-          ပြင်ရန်
-        </button>
-        <button
-  class="btn"
-  type="button"
-  data-delete-historical-advance="${safeText(lot.serverId)}"
-  style="padding:6px 10px;margin-left:6px;color:#a11d2f"
->
-  မှားစာရင်းဖျက်ရန်
-</button>
-      `
+          const hasRepayment = advanceRepayments.some(
+            payment => payment.advanceId === lot.id
+          );
+
+          const canFullEdit =
+            Boolean(lot.openingEntryId) &&
+            status === 'OPEN' &&
+            !hasRepayment;
+
+          return `
+            <tr>
+              <td>
+                <b>${safeText(lot.id)}</b>
+              </td>
+
+              <td>
+                ${formatAdvanceDate(lot.issuedDate)}
+              </td>
+
+              <td>
+                ${safeText(typeLabel)}
+              </td>
+
+              <td>
+                ${safeText(
+                  advanceLotDescription(lot, false)
+                )}
+              </td>
+
+              <td>
+                <b>
+                  ${safeText(
+                    advanceLotDescription(lot, true)
+                  )}
+                </b>
+              </td>
+
+              <td>
+                ${mm(lot.monthlyRate)}%
+              </td>
+
+              <td>
+                ${safeText(note || '—')}
+              </td>
+
+              <td>
+                <span
+                  class="advance-status ${status.toLowerCase()}"
+                >
+                  ${statusLabel}
+                </span>
+              </td>
+
+              <td>
+                <div class="advance-ledger-actions">
+                  ${
+                    canFullEdit
+                      ? `
+                          <button
+                            class="btn"
+                            type="button"
+                            data-edit-historical-advance="${safeText(lot.serverId)}"
+                          >
+                            ပြင်ရန်
+                          </button>
+
+                          <button
+                            class="btn delete-action"
+                            type="button"
+                            data-delete-historical-advance="${safeText(lot.serverId)}"
+                          >
+                            မှားစာရင်းဖျက်ရန်
+                          </button>
+                        `
+                      : `
+                          <span style="color:var(--muted)">
+                            ပြင်/ဖျက်မရ
+                          </span>
+                        `
+                  }
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('')
       : `
-        <span style="color:var(--muted)">
-          ပြင်မရ
-        </span>
-      `
-  }
-</td>
+          <tr>
+            <td
+              colspan="9"
+              style="text-align:center;color:var(--muted)"
+            >
+              ဤတောင်သူ၏ စိုက်ထုတ် Lot မရှိပါ
+            </td>
           </tr>
         `;
-      }).join('')
-    : `
-      <tr>
-        <td colspan="10" style="text-align:center;color:var(--muted)">
-          စိုက်ထုတ်စာရင်း မရှိသေးပါ
-        </td>
-      </tr>
-    `;
 }
-advanceLedgerBody.addEventListener('click', async event => {
+
+
+advanceFarmerSummaryBodyEl.addEventListener(
+  'click',
+  event => {
+    const trigger = event.target.closest(
+      '[data-view-advance-farmer]'
+    );
+
+    if (!trigger) return;
+
+    selectedAdvanceFarmerId =
+      trigger.dataset.viewAdvanceFarmer;
+
+    renderAdvanceLedger();
+
+    advanceLotDetailPanelEl.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+);
+
+
+advanceLotBackEl.addEventListener('click', () => {
+  selectedAdvanceFarmerId = '';
+
+  renderAdvanceLedger();
+
+  advanceFarmerSummaryPanelEl.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+});
+  advanceLedgerBody.addEventListener('click', async event => {
   let button = event.target.closest('[data-edit-advance-note]');
   if (!button) return;
 
