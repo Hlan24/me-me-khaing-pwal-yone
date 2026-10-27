@@ -369,7 +369,7 @@
 
   .farmer-statement-table{
     width:100%;
-    min-width:1250px;
+    min-width:1000px;
     border-collapse:collapse;
   }
 
@@ -1019,8 +1019,6 @@ active          BOOLEAN</code></div></div>
           <th>Reference</th>
           <th>အကြောင်းအရာ</th>
           <th>အိတ် / ပိဿာ / ပစ္စည်း</th>
-          <th>အကြွေးတိုး</th>
-          <th>အကြွေးလျော့</th>
           <th>ငွေပေး</th>
           <th>ငွေလက်ခံ</th>
           <th>အကြွေးလက်ကျန်</th>
@@ -1270,18 +1268,16 @@ active          BOOLEAN</code></div></div>
   </section>
 
   <table>
-    <colgroup>
-      <col style="width:8%">
-      <col style="width:10%">
-      <col style="width:10%">
-      <col style="width:20%">
-      <col style="width:10%">
-      <col style="width:8%">
-      <col style="width:8%">
-      <col style="width:8%">
-      <col style="width:8%">
-      <col style="width:10%">
-    </colgroup>
+   <colgroup>
+  <col style="width:9%">
+  <col style="width:11%">
+  <col style="width:12%">
+  <col style="width:25%">
+  <col style="width:12%">
+  <col style="width:10%">
+  <col style="width:10%">
+  <col style="width:11%">
+</colgroup>
 
     <thead>
       <tr>
@@ -1290,8 +1286,6 @@ active          BOOLEAN</code></div></div>
         <th>Reference</th>
         <th>အကြောင်းအရာ</th>
         <th>အိတ် / ပိဿာ / ပစ္စည်း</th>
-        <th>အကြွေးတိုး</th>
-        <th>အကြွေးလျော့</th>
         <th>ငွေပေး</th>
         <th>ငွေလက်ခံ</th>
         <th>အကြွေးလက်ကျန်</th>
@@ -1300,7 +1294,7 @@ active          BOOLEAN</code></div></div>
 
     <tbody id="farmerStatementPrintBody">
       <tr>
-        <td colspan="10" style="text-align:center">
+        <td colspan="8" style="text-align:center">
           စာရင်းမရွေးရသေးပါ
         </td>
       </tr>
@@ -4963,19 +4957,7 @@ function farmerStatementRowHtml(row) {
 
       <td>${safeText(row.measure)}</td>
 
-      <td>
-        ${farmerStatementMoneyCell(
-          row.debtIncrease,
-          'farmer-statement-money-out'
-        )}
-      </td>
-
-      <td>
-        ${farmerStatementMoneyCell(
-          row.debtDecrease,
-          'farmer-statement-money-in'
-        )}
-      </td>
+     
 
       <td>
         ${farmerStatementMoneyCell(
