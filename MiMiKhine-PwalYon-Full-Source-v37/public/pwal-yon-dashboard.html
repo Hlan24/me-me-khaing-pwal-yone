@@ -243,11 +243,52 @@
     text-decoration:underline;
   }
 
+  body.farmer-statement-open{
+  overflow:hidden;
+}
+
+.farmer-statement-panel{
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  margin:0;
+  padding:24px 32px 50px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:0;
+  border-radius:0;
+  background:var(--paper);
+  box-shadow:none;
+}
+
+.farmer-statement-panel > *{
+  width:min(100%,1600px);
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.farmer-statement-panel .farmer-statement-head{
+  position:sticky;
+  top:-24px;
+  z-index:10;
+  padding:24px 0 14px;
+  border-bottom:1px solid var(--line);
+  background:var(--paper);
+}
+@media(max-width:720px){
   .farmer-statement-panel{
-    margin-top:16px;
-    border-top:4px solid var(--red);
+    padding:16px 12px 32px;
   }
 
+  .farmer-statement-panel .farmer-statement-head{
+    top:-16px;
+    padding:16px 0 12px;
+  }
+}
   .farmer-statement-panel[hidden]{
     display:none !important;
   }
@@ -4625,18 +4666,23 @@ async function loadFarmerStatement(
   farmerStatementState.loading = true;
 
   panel.hidden = false;
-  status.className = 'farmer-statement-status loading';
+
+document.body.classList.add(
+  'farmer-statement-open'
+);
+
+panel.scrollTo({
+  top: 0,
+  left: 0,
+  behavior: 'auto'
+});
+
+status.className = 'farmer-statement-status loading';
   status.textContent =
     farmer.full_name +
     ' ၏ Server စာရင်းအားလုံး ဖတ်နေသည်…';
 
-  if (scroll) {
-    panel.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }
-
+ 
   try {
     const [
       lots,
@@ -5248,14 +5294,34 @@ farmerStatementEl(
   }
 );
 
+function closeFarmerStatementPage() {
+  farmerStatementEl(
+    'farmerStatementPanel'
+  ).hidden = true;
+
+  document.body.classList.remove(
+    'farmer-statement-open'
+  );
+}
+
 farmerStatementEl(
   'closeFarmerStatement'
 )?.addEventListener(
   'click',
-  () => {
-    farmerStatementEl(
-      'farmerStatementPanel'
-    ).hidden = true;
+  closeFarmerStatementPage
+);
+
+document.addEventListener(
+  'keydown',
+  event => {
+    if (
+      event.key === 'Escape' &&
+      !farmerStatementEl(
+        'farmerStatementPanel'
+      ).hidden
+    ) {
+      closeFarmerStatementPage();
+    }
   }
 );
 
