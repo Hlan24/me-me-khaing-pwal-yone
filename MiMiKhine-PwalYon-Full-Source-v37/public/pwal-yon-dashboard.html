@@ -225,6 +225,278 @@
       .voucher .footer{margin:4mm 0 0!important;padding:2mm 0 0!important;border-top:1px solid #000!important;text-align:center;font-size:7pt!important}
     }
   </style>
+  <style id="farmer-statement-styles">
+  .farmer-name-link{
+    appearance:none;
+    border:0;
+    background:transparent;
+    padding:0;
+    color:var(--red);
+    font:inherit;
+    font-weight:700;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  .farmer-name-link:hover,
+  .farmer-name-link:focus-visible{
+    text-decoration:underline;
+  }
+
+  .farmer-statement-panel{
+    margin-top:16px;
+    border-top:4px solid var(--red);
+  }
+
+  .farmer-statement-panel[hidden]{
+    display:none !important;
+  }
+
+  .farmer-statement-head{
+    align-items:flex-start;
+    gap:12px;
+  }
+
+  .farmer-statement-actions{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:8px;
+  }
+
+  .farmer-statement-status{
+    margin:0 0 14px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:#fff0ee;
+    color:#65484d;
+    font-size:10px;
+    line-height:1.7;
+  }
+
+  .farmer-statement-status.loading{
+    background:#fff7dc;
+    color:#795b14;
+  }
+
+  .farmer-statement-status.success{
+    background:#e8f4eb;
+    color:#236c42;
+  }
+
+  .farmer-statement-status.error{
+    background:#fdebe7;
+    color:#a11d2f;
+  }
+
+  .farmer-statement-summary{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:10px;
+    margin-bottom:14px;
+  }
+
+  .farmer-statement-summary > div{
+    min-width:0;
+    padding:13px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fffaf9;
+  }
+
+  .farmer-statement-summary small{
+    display:block;
+    color:var(--muted);
+    font-size:8px;
+    line-height:1.6;
+  }
+
+  .farmer-statement-summary b{
+    display:block;
+    margin-top:5px;
+    color:var(--ink);
+    font:700 14px/1.5 Manrope,'Noto Sans Myanmar',sans-serif;
+    overflow-wrap:anywhere;
+  }
+
+  .farmer-statement-table-wrap{
+    width:100%;
+    overflow-x:auto;
+    border:1px solid var(--line);
+    border-radius:12px;
+  }
+
+  .farmer-statement-table{
+    width:100%;
+    min-width:1250px;
+    border-collapse:collapse;
+  }
+
+  .farmer-statement-table th,
+  .farmer-statement-table td{
+    padding:10px 8px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+    font-size:9px;
+    line-height:1.65;
+  }
+
+  .farmer-statement-table th{
+    position:sticky;
+    top:0;
+    z-index:1;
+    background:#fff0ee;
+    color:var(--ink);
+    text-align:left;
+    white-space:nowrap;
+  }
+
+  .farmer-statement-table td:nth-child(n+5){
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .farmer-statement-table tbody tr:hover{
+    background:#fffaf9;
+  }
+
+  .farmer-statement-type{
+    display:inline-flex;
+    padding:4px 7px;
+    border-radius:999px;
+    background:#f2e6e3;
+    color:var(--red);
+    font-size:8px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+
+  .farmer-statement-ref{
+    font-family:Manrope,monospace;
+    font-size:8px;
+    overflow-wrap:anywhere;
+  }
+
+  .farmer-statement-money-in{
+    color:#236c42;
+    font-weight:700;
+  }
+
+  .farmer-statement-money-out{
+    color:#a11d2f;
+    font-weight:700;
+  }
+
+  .farmer-statement-footer{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    margin-top:12px;
+    color:var(--muted);
+    font-size:8px;
+    line-height:1.6;
+  }
+
+  .farmer-statement-print{
+    display:none;
+  }
+
+  @media(max-width:1100px){
+    .farmer-statement-summary{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .farmer-statement-summary > div:last-child{
+      grid-column:1/-1;
+    }
+  }
+
+  @media(max-width:720px){
+    .farmer-statement-head{
+      display:block;
+    }
+
+    .farmer-statement-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      margin-top:12px;
+    }
+
+    .farmer-statement-actions .btn{
+      width:100%;
+    }
+
+    #closeFarmerStatement{
+      grid-column:1/-1;
+    }
+
+    .farmer-statement-summary{
+      grid-template-columns:1fr;
+    }
+
+    .farmer-statement-summary > div:last-child{
+      grid-column:auto;
+    }
+
+    .farmer-statement-footer{
+      display:block;
+    }
+
+    .farmer-statement-footer span{
+      display:block;
+      margin-top:5px;
+    }
+  }
+
+  @media print{
+    body.printing-farmer-statement .app,
+    body.printing-farmer-statement .voucher,
+    body.printing-farmer-statement .toast,
+    body.printing-farmer-statement .supabase-modal{
+      display:none !important;
+    }
+
+    body.printing-farmer-statement .farmer-statement-print{
+      display:block !important;
+      width:100%;
+      margin:0;
+      padding:0;
+      color:#000;
+      background:#fff;
+      font-family:'Noto Sans Myanmar','Myanmar Text',sans-serif;
+    }
+
+    body.printing-farmer-statement .farmer-statement-print *{
+      color:#000 !important;
+      background:transparent !important;
+      box-shadow:none !important;
+      text-shadow:none !important;
+    }
+
+    body.printing-farmer-statement .farmer-statement-print table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      font-size:7pt;
+    }
+
+    body.printing-farmer-statement .farmer-statement-print thead{
+      display:table-header-group;
+    }
+
+    body.printing-farmer-statement .farmer-statement-print th,
+    body.printing-farmer-statement .farmer-statement-print td{
+      padding:2mm 1mm;
+      border:1px solid #777;
+      vertical-align:top;
+      overflow-wrap:anywhere;
+    }
+
+    body.printing-farmer-statement .farmer-statement-print tr{
+      break-inside:avoid;
+    }
+  }
+</style>
 </head>
 <body>
 <div class="app">
@@ -642,6 +914,96 @@ active          BOOLEAN</code></div></div>
         </form>
       </div>
       <div class="panel"><div class="panel-head"><div><h3>တောင်သူစာရင်း <span id="farmerCountDisplay" style="color:var(--muted);font-weight:500">(၀)</span></h3><span style="font-size:11px;color:var(--muted)">Search၊ Risk Filter၊ Active အခြေအနေနှင့် Opening Debt</span></div><button class="btn primary" id="addFarmerBtn">＋ တောင်သူအသစ်</button></div><div class="farmer-toolbar"><label class="farmer-search">⌕<input id="farmerSearch" placeholder="အမည်၊ Customer ID၊ ဖုန်း၊ ရွာဖြင့် ရှာရန်"></label><select class="btn" id="farmerRiskFilter"><option value="all">Risk အားလုံး</option><option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option><option value="BLACKLISTED">Blacklisted</option></select></div><div class="farmer-table-wrap"><table><thead><tr><th>Customer ID</th><th>တောင်သူ</th><th>နေရပ်</th><th>စိုက်ဧက / သီးနှံ</th><th>Opening Debt</th><th>Risk / Status</th><th>လုပ်ဆောင်ချက်</th></tr></thead><tbody id="farmerTableBody"><tr><td colspan="7" class="master-empty">Login ဝင်ပြီး တောင်သူ Master ကို ဖတ်ပါ</td></tr></tbody></table></div></div>
+      <section class="panel farmer-statement-panel" id="farmerStatementPanel" hidden>
+  <div class="panel-head farmer-statement-head">
+    <div>
+      <h3 id="farmerStatementTitle">တောင်သူတစ်ယောက်ချင်း စာရင်းရှင်းတမ်း</h3>
+      <span id="farmerStatementMeta" class="master-muted">
+        တောင်သူနာမည်ကို ရွေးချယ်ပါ
+      </span>
+    </div>
+
+    <div class="farmer-statement-actions">
+      <button class="btn" id="refreshFarmerStatement" type="button">
+        ↻ ပြန်ဖတ်ရန်
+      </button>
+
+      <button class="btn primary" id="printFarmerStatement" type="button">
+        🖨 Print / PDF
+      </button>
+
+      <button class="btn" id="closeFarmerStatement" type="button">
+        ✕ ပိတ်ရန်
+      </button>
+    </div>
+  </div>
+
+  <div class="farmer-statement-status" id="farmerStatementStatus" role="status">
+    တောင်သူနာမည်ကို နှိပ်ပြီး စာရင်းရှင်းတမ်းကြည့်ပါ
+  </div>
+
+  <div class="farmer-statement-summary">
+    <div>
+      <small>လက်ရှိအကြွေးလက်ကျန်</small>
+      <b id="farmerStatementDebt">ကျပ် ၀</b>
+    </div>
+
+    <div>
+      <small>အပ်ပဲလက်ကျန်</small>
+      <b id="farmerStatementConsignment">၀ ပိဿာ</b>
+    </div>
+
+    <div>
+      <small>တောင်သူထံ ပေးငွေစုစုပေါင်း</small>
+      <b id="farmerStatementCashOut">ကျပ် ၀</b>
+    </div>
+
+    <div>
+      <small>တောင်သူထံမှ လက်ခံငွေစုစုပေါင်း</small>
+      <b id="farmerStatementCashIn">ကျပ် ၀</b>
+    </div>
+
+    <div>
+      <small>စာရင်းအရေအတွက်</small>
+      <b id="farmerStatementCount">၀</b>
+    </div>
+  </div>
+
+  <div class="farmer-statement-table-wrap">
+    <table class="farmer-statement-table">
+      <thead>
+        <tr>
+          <th>ရက်စွဲ</th>
+          <th>အမျိုးအစား</th>
+          <th>Reference</th>
+          <th>အကြောင်းအရာ</th>
+          <th>အိတ် / ပိဿာ / ပစ္စည်း</th>
+          <th>အကြွေးတိုး</th>
+          <th>အကြွေးလျော့</th>
+          <th>ငွေပေး</th>
+          <th>ငွေလက်ခံ</th>
+          <th>အကြွေးလက်ကျန်</th>
+        </tr>
+      </thead>
+
+      <tbody id="farmerStatementBody">
+        <tr>
+          <td colspan="10" class="master-empty">
+            တောင်သူနာမည်ကို နှိပ်ပြီး စာရင်းရှင်းတမ်းကြည့်ပါ
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="farmer-statement-footer">
+    <span>
+      စိုက်ထုတ်အကြွေး၊ ပြန်ဆပ်ငွေ၊ အိတ်ချိန်၊ အပ်ပဲ၊ ကုန်ပစ္စည်းနှင့်
+      ငွေပေး/ငွေလက်ခံမှုများကို ရက်စွဲအလိုက်ပြထားသည်။
+    </span>
+    <span id="farmerStatementGeneratedAt"></span>
+  </div>
+</section>
       <section class="panel" id="stockLocationMasterPanel"><div class="panel-head"><div><h3>Stock Location Master</h3><span class="master-muted">ဂိုဒေါင်၊ ဆိုင်နှင့် အခြားသိုလှောင်နေရာများ</span></div><button class="btn" id="refreshStockLocations" type="button">↻ ပြန်ဖတ်ရန်</button></div><div class="master-grid"><form class="master-form" id="stockLocationForm"><div class="master-editing" id="stockLocationEditing"></div><div class="field"><label for="stockLocationName">နေရာအမည် *</label><input id="stockLocationName" required maxlength="160" placeholder="ဥပမာ — ပင်မဂိုဒေါင်"></div><div class="field"><label for="stockLocationType">အမျိုးအစား</label><select id="stockLocationType"><option value="WAREHOUSE">ဂိုဒေါင်</option><option value="SHOP">ဆိုင်</option><option value="OTHER">အခြား</option></select></div><label class="master-active-toggle"><input id="stockLocationActive" type="checkbox" checked> Active အဖြစ် အသုံးပြုမည်</label><div class="field"><label for="stockLocationNotes">မှတ်ချက်</label><input id="stockLocationNotes" maxlength="500" placeholder="လိပ်စာ၊ တာဝန်ခံ စသည်"></div><div class="form-actions"><button class="btn" id="cancelStockLocationEdit" type="button">ရှင်းမည်</button><button class="btn primary" id="saveStockLocation" type="submit">✓ သိမ်းရန်</button></div></form><div class="master-table-wrap"><table class="master-table"><thead><tr><th>Location ID</th><th>အမည်</th><th>အမျိုးအစား</th><th>Status</th><th>ပြင်ရန်</th></tr></thead><tbody id="stockLocationMasterBody"><tr><td colspan="5" class="master-empty">Login ဝင်ပြီး Stock Location ကို ဖတ်ပါ</td></tr></tbody></table></div></div></section>
       <section class="panel" id="staffRoleMasterPanel"><div class="panel-head"><div><h3>Staff / Role Master</h3><span class="master-muted">Supabase Auth တွင်ရှိပြီးသား User များကို Role နှင့် Active သတ်မှတ်ရန်</span></div><button class="btn" id="refreshStaffMaster" type="button">↻ ပြန်ဖတ်ရန်</button></div><div class="master-inline-note"><b>ဝန်ထမ်းအသစ် —</b> Public Signup ကို ပိတ်ထားသည်။ ပိုင်ရှင်က Supabase Authentication → Users တွင် User ဖန်တီးပြီးမှ ဤစာရင်းတွင် Inactive အဖြစ်ပေါ်လာမည်။ နောက်ဆုံး Active Owner ကို ပိတ်ခြင်း/Role လျှော့ခြင်းကို Server က တားထားသည်။</div><div class="master-table-wrap" style="margin-top:14px"><table class="master-table"><thead><tr><th>Email</th><th>Display Name / Role / Active</th><th>နောက်ဆုံးပြင်ချိန်</th><th>လုပ်ဆောင်ချက်</th></tr></thead><tbody id="staffRoleMasterBody"><tr><td colspan="4" class="master-empty">Owner / Admin Login ဝင်ပြီး Staff ကို ဖတ်ပါ</td></tr></tbody></table></div></section>
       <section class="panel" id="openingBalanceMasterPanel"><div class="panel-head"><div><h3>Opening Balance Import</h3><span class="master-muted">CSV ကို ဦးစွာ Preview/Validate လုပ်ပြီးမှ Server သို့ Atomic Commit လုပ်မည်</span></div><span class="pill" id="openingImportRoleBadge">Owner / Admin / Accountant</span></div><div class="opening-steps"><div class="opening-step"><small>STEP 1</small><b>အမျိုးအစားနှင့် CSV ရွေးပါ</b></div><div class="opening-step"><small>STEP 2</small><b>တစ်ကြောင်းချင်း Validate လုပ်ပါ</b></div><div class="opening-step"><small>STEP 3</small><b>Server မှ OB Number ထုတ်ပြီး Commit</b></div></div><div class="opening-input-grid"><div class="field"><label for="openingImportType">Import အမျိုးအစား *</label><select id="openingImportType"><option value="FARMER_ADVANCE">အရင်စိုက်ထုတ်စာရင်း (ငွေ/ပစ္စည်း)</option><option value="FARMER_DEBT">တောင်သူ အဖွင့်အကြွေး Lot</option><option value="PRODUCT_STOCK">ကုန်ပစ္စည်း အဖွင့် Stock</option><option value="CROP_STOCK">ပွဲရုံပိုင် ပဲ/ငရုတ် အဖွင့် Stock</option></select></div><div class="field"><label for="openingSourceName">Source / စာရင်းအမည် *</label><input id="openingSourceName" maxlength="200" placeholder="ဥပမာ — ၂၀၂၆ မူလစာရင်း.xlsx"></div><div class="field full"><span class="master-muted" id="openingImportHelp">အရင်ရက်စွဲပါ ငွေသား/ပစ္စည်း စိုက်ထုတ်ကို ထည့်နိုင်သည်။ ယနေ့ Cash Book နှင့် Stock ကို မပြောင်းဘဲ အကြွေး Lot နှင့် အတိုးစတင်ရက်သာ ဖန်တီးမည်။</span></div><div class="field full"><label for="openingImportNotes">Import မှတ်ချက်</label><input id="openingImportNotes" maxlength="500" placeholder="စစ်ဆေးသူ၊ ရက်စွဲ စသည်"></div><div class="full"><div class="opening-toolbar"><button class="btn" id="downloadOpeningTemplate" type="button">↓ CSV Template</button><label class="btn" for="openingCsvFile">CSV File ရွေးရန်</label><input class="opening-file" id="openingCsvFile" type="file" accept=".csv,text/csv"><button class="btn" id="previewOpeningImport" type="button">⌕ Preview & Validate</button><button class="btn primary" id="commitOpeningImport" type="button" disabled>✓ Server သို့ Commit</button></div></div><div class="field full"><label for="openingCsvText">CSV Data</label><textarea class="opening-textarea" id="openingCsvText" spellcheck="false" placeholder="Template ကို download လုပ်ပါ၊ သို့မဟုတ် CSV အကြောင်းအရာကို ဤနေရာတွင် Paste လုပ်ပါ"></textarea></div></div><div class="opening-result" id="openingImportResult" role="alert"></div><div class="opening-preview" id="openingImportPreview" hidden><div class="opening-summary"><div><small>စာကြောင်း</small><b id="openingPreviewRows">၀</b></div><div><small>အောင်မြင်</small><b id="openingPreviewValid">၀</b></div><div><small>အမှား</small><b id="openingPreviewErrors">၀</b></div></div><div class="master-table-wrap"><table><thead id="openingPreviewHead"></thead><tbody id="openingPreviewBody"></tbody></table></div></div><div class="master-import-history"><div class="panel-head"><div><h3>Import History</h3><span class="master-muted">Commit ပြီးသောစာရင်းကို မဖျက်/မပြင်နိုင်ပါ</span></div><button class="btn" id="refreshOpeningHistory" type="button">↻ History</button></div><div class="master-table-wrap"><table><thead><tr><th>OB Number</th><th>Business Date</th><th>အမျိုးအစား</th><th>Source</th><th>Rows</th><th>စုစုပေါင်း</th><th>တင်သူ / အချိန်</th></tr></thead><tbody id="openingImportHistoryBody"><tr><td colspan="7" class="master-empty">Commit ပြီးသော Import မရှိသေးပါ</td></tr></tbody></table></div></div></section>
@@ -743,6 +1105,212 @@ active          BOOLEAN</code></div></div>
   <p class="voucher-note" id="voucherNote" hidden></p>
   <div class="signatures"><span>စာရင်းရှင်းသူ လက်မှတ်</span><span>လက်ခံသူ လက်မှတ်</span></div>
   <div class="footer">မီမီခိုင် ပွဲရုံ · ဘောင်ချာအမှတ်နှင့် စာရင်းတန်ဖိုးကို စစ်ဆေးပြီး လက်မှတ်ရေးထိုးပါ</div>
+</section>
+  <section
+  class="farmer-statement-print"
+  id="farmerStatementPrint"
+  aria-label="တောင်သူစာရင်းရှင်းတမ်း"
+>
+  <header
+    style="
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10mm;
+      align-items:start;
+      padding-bottom:4mm;
+      border-bottom:2px solid #000;
+    "
+  >
+    <div>
+      <small style="display:block;font-size:8pt">
+        ဆန်နှင့် ပဲမျိုးစုံ ရောင်းဝယ်ရေး
+      </small>
+
+      <h1 style="margin:1mm 0;font-size:22pt;line-height:1.5">
+        မီမီခိုင်
+      </h1>
+
+      <div style="font-size:8pt;line-height:1.7">
+        <div>
+          ဖုန်း — 09 422 464 572၊ 09 795 012 580၊
+          09 882 288 208၊ 09 455 338 854
+        </div>
+        <div>
+          လိပ်စာ — ဓမ္မာရုံကျောင်းလမ်း၊ ဟင်္သာတမြို့။
+        </div>
+      </div>
+    </div>
+
+    <div style="min-width:48mm;text-align:right">
+      <b style="display:block;font-size:13pt">
+        တောင်သူစာရင်းရှင်းတမ်း
+      </b>
+      <span
+        id="farmerStatementPrintGeneratedAt"
+        style="display:block;margin-top:2mm;font-size:8pt"
+      ></span>
+    </div>
+  </header>
+
+  <section
+    style="
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:2mm 8mm;
+      margin:4mm 0;
+      font-size:9pt;
+      line-height:1.7;
+    "
+  >
+    <div>
+      Customer ID —
+      <b id="farmerStatementPrintCustomerId">—</b>
+    </div>
+
+    <div>
+      တောင်သူအမည် —
+      <b id="farmerStatementPrintName">—</b>
+    </div>
+
+    <div>
+      ဖုန်း —
+      <span id="farmerStatementPrintPhone">—</span>
+    </div>
+
+    <div>
+      နေရပ်လိပ်စာ —
+      <span id="farmerStatementPrintAddress">—</span>
+    </div>
+
+    <div style="grid-column:1/-1">
+      စာရင်းကာလ —
+      <span id="farmerStatementPrintPeriod">
+        စာရင်းစတင်သည့်ရက်မှ ယနေ့အထိ
+      </span>
+    </div>
+  </section>
+
+  <section
+    style="
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:3mm;
+      margin:4mm 0;
+      padding:3mm 0;
+      border-top:1px solid #000;
+      border-bottom:1px solid #000;
+      font-size:8pt;
+    "
+  >
+    <div>
+      <small style="display:block">လက်ရှိအကြွေးလက်ကျန်</small>
+      <b id="farmerStatementPrintDebt">ကျပ် ၀</b>
+    </div>
+
+    <div>
+      <small style="display:block">အပ်ပဲလက်ကျန်</small>
+      <b id="farmerStatementPrintConsignment">၀ ပိဿာ</b>
+    </div>
+
+    <div>
+      <small style="display:block">တောင်သူထံ ပေးငွေ</small>
+      <b id="farmerStatementPrintCashOut">ကျပ် ၀</b>
+    </div>
+
+    <div>
+      <small style="display:block">တောင်သူထံမှ လက်ခံငွေ</small>
+      <b id="farmerStatementPrintCashIn">ကျပ် ၀</b>
+    </div>
+
+    <div>
+      <small style="display:block">စာရင်းအရေအတွက်</small>
+      <b id="farmerStatementPrintCount">၀</b>
+    </div>
+  </section>
+
+  <table>
+    <colgroup>
+      <col style="width:8%">
+      <col style="width:10%">
+      <col style="width:10%">
+      <col style="width:20%">
+      <col style="width:10%">
+      <col style="width:8%">
+      <col style="width:8%">
+      <col style="width:8%">
+      <col style="width:8%">
+      <col style="width:10%">
+    </colgroup>
+
+    <thead>
+      <tr>
+        <th>ရက်စွဲ</th>
+        <th>အမျိုးအစား</th>
+        <th>Reference</th>
+        <th>အကြောင်းအရာ</th>
+        <th>အိတ် / ပိဿာ / ပစ္စည်း</th>
+        <th>အကြွေးတိုး</th>
+        <th>အကြွေးလျော့</th>
+        <th>ငွေပေး</th>
+        <th>ငွေလက်ခံ</th>
+        <th>အကြွေးလက်ကျန်</th>
+      </tr>
+    </thead>
+
+    <tbody id="farmerStatementPrintBody">
+      <tr>
+        <td colspan="10" style="text-align:center">
+          စာရင်းမရွေးရသေးပါ
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div
+    style="
+      display:flex;
+      justify-content:space-between;
+      gap:20mm;
+      margin-top:15mm;
+      padding-top:5mm;
+      font-size:8pt;
+    "
+  >
+    <span
+      style="
+        width:38%;
+        padding-top:2mm;
+        border-top:1px dotted #000;
+        text-align:center;
+      "
+    >
+      စာရင်းထုတ်ပေးသူ လက်မှတ်
+    </span>
+
+    <span
+      style="
+        width:38%;
+        padding-top:2mm;
+        border-top:1px dotted #000;
+        text-align:center;
+      "
+    >
+      တောင်သူ လက်မှတ်
+    </span>
+  </div>
+
+  <footer
+    style="
+      margin-top:5mm;
+      padding-top:2mm;
+      border-top:1px solid #000;
+      text-align:center;
+      font-size:7pt;
+    "
+  >
+    မီမီခိုင် ပွဲရုံ · စာရင်းရှင်းတမ်းရှိ Reference နံပါတ်များနှင့်
+    ငွေပမာဏများကို စစ်ဆေးပြီး လက်မှတ်ရေးထိုးပါ။
+  </footer>
 </section>
 <div class="supabase-modal" id="supabaseModal" hidden>
   <section class="supabase-dialog" role="dialog" aria-modal="true" aria-labelledby="supabaseDialogTitle">
@@ -2092,7 +2660,7 @@ function cropById(id){return masterState.crops.find(row=>row.crop_type_id===id)}
 function renderFarmerMaster(){
   let query=(farmerSearch.value||'').trim().toLowerCase(),risk=farmerRiskFilter.value,rows=masterState.farmers.filter(row=>(risk==='all'||row.risk_level===risk)&&(!query||[row.customer_id,row.full_name,row.phone_normalized,row.phone_display,row.village,row.township].some(value=>String(value||'').toLowerCase().includes(query))));
   farmerTotal=masterState.farmers.length;farmerActive=masterState.farmers.filter(row=>row.active).length;farmerBlacklist=masterState.farmers.filter(row=>row.risk_level==='BLACKLISTED').length;farmerDebtTotal=masterState.farmers.reduce((sum,row)=>sum+Number(row.opening_debt_kyat||0),0);Object.keys(farmerDebt).forEach(key=>delete farmerDebt[key]);masterState.farmers.forEach(row=>{farmerDebt[row.customer_id]=Number(row.opening_debt_kyat||0)});updateFarmerDashboard();if(!masterEdit.farmer)farmerIdPreview.textContent='Server Auto';
-  farmerTableBody.innerHTML=rows.length?rows.map(row=>{let crop=cropById(row.primary_crop_type_id),riskClass='risk-'+String(row.risk_level||'LOW').toLowerCase(),status=row.active?'Active':'Inactive';return`<tr class="farmer-row" data-risk="${safeText(row.risk_level)}"><td><b>${safeText(row.customer_id)}</b></td><td><b>${safeText(row.full_name)}</b><small style="display:block;color:var(--muted)">${safeText(row.phone_display||row.phone_normalized||'ဖုန်းမရှိ')}</small></td><td>${safeText(row.village||'—')}<small style="display:block;color:var(--muted)">${safeText(row.township||'—')}</small></td><td>${mm(Number(row.acres||0))} ဧက<small style="display:block;color:var(--muted)">${safeText(crop?.name||'—')}</small></td><td>${signedMoney(Number(row.opening_debt_kyat||0))}</td><td><span class="risk-pill ${riskClass}">${safeText(row.risk_level)}</span><small style="display:block;margin-top:5px;color:${row.active?'#277448':'#a11d2f'}">${status}</small></td><td><button class="btn" type="button" data-edit-farmer="${safeText(row.customer_id)}">ပြင်ရန်</button><button class="btn" type="button" data-remove-farmer="${safeText(row.customer_id)}" ${masterRoleIn(['owner'])?'':'disabled'}>ဖျက်/ပိတ်ရန်</button></td></tr>`}).join(''):'<tr><td colspan="7" class="master-empty">ကိုက်ညီသော တောင်သူမရှိပါ</td></tr>';
+  farmerTableBody.innerHTML=rows.length?rows.map(row=>{let crop=cropById(row.primary_crop_type_id),riskClass='risk-'+String(row.risk_level||'LOW').toLowerCase(),status=row.active?'Active':'Inactive';return`<tr class="farmer-row" data-risk="${safeText(row.risk_level)}"><td><b>${safeText(row.customer_id)}</b></td><td><button class="farmer-name-link" type="button" data-view-farmer-statement="${safeText(row.customer_id)}">${safeText(row.full_name)}</button><small style="display:block;color:var(--muted)">${safeText(row.phone_display||row.phone_normalized||'ဖုန်းမရှိ')}</small></td><td>${safeText(row.village||'—')}<small style="display:block;color:var(--muted)">${safeText(row.township||'—')}</small></td><td>${mm(Number(row.acres||0))} ဧက<small style="display:block;color:var(--muted)">${safeText(crop?.name||'—')}</small></td><td>${signedMoney(Number(row.opening_debt_kyat||0))}</td><td><span class="risk-pill ${riskClass}">${safeText(row.risk_level)}</span><small style="display:block;margin-top:5px;color:${row.active?'#277448':'#a11d2f'}">${status}</small></td><td><button class="btn" type="button" data-edit-farmer="${safeText(row.customer_id)}">ပြင်ရန်</button><button class="btn" type="button" data-remove-farmer="${safeText(row.customer_id)}" ${masterRoleIn(['owner'])?'':'disabled'}>ဖျက်/ပိတ်ရန်</button></td></tr>`}).join(''):'<tr><td colspan="7" class="master-empty">ကိုက်ညီသော တောင်သူမရှိပါ</td></tr>';
 }
 function renderCropMaster(){let can=masterCanCatalog();cropCatalogCount.textContent='('+mm(masterState.crops.length)+')';cropCatalogBody.innerHTML=masterState.crops.length?masterState.crops.map(row=>`<tr class="crop-row"><td><b>${safeText(row.crop_type_id)}</b></td><td>${safeText(row.name)}<small style="display:block;color:var(--muted)">${row.active?'Active':'Inactive'}</small></td><td>${row.category==='CHILI'?'ငရုတ်':row.category==='BEAN'?'ပဲ':'အခြား'}</td><td>${Number(row.pricing_divisor_pyitha)===1?'တစ်ပိဿာ':mm(Number(row.pricing_divisor_pyitha))+' ပိဿာ'}</td><td>${viss(Number(row.default_tare_centi_pyitha||0))} ပိဿာ</td><td><button class="btn" type="button" data-edit-crop="${safeText(row.crop_type_id)}" ${can?'':'disabled'}>ပြင်ရန်</button></td></tr>`).join(''):'<tr><td colspan="6" class="master-empty">သီးနှံ Master မရှိသေးပါ</td></tr>';let header=cropCatalogBody.closest('table')?.querySelector('thead tr');if(header&&!header.querySelector('[data-master-action-head]'))header.insertAdjacentHTML('beforeend','<th data-master-action-head>လုပ်ဆောင်ချက်</th>')}
 function renderProductMaster(){let totals=openingProductTotals(),can=masterCanCatalog();productCatalogCount.textContent='('+mm(masterState.products.length)+')';productCatalogBody.innerHTML=masterState.products.length?masterState.products.map(row=>{let stock=totals.get(row.product_id)||0,reorder=Number(row.reorder_level||0);return`<tr class="product-row"><td><b>${safeText(row.product_id)}</b></td><td>${safeText(row.name)}<small style="display:block;color:var(--muted)">${row.active?'Active':'Inactive'}</small></td><td>${safeText(row.category)}</td><td>${safeText(row.unit_name)}${row.whole_units_only?' · ကိန်းပြည့်':''}</td><td>${signedMoney(Number(row.default_unit_price_kyat||0))}</td><td class="${stock<=reorder?'stock-low':'stock-ok'}">${mm(stock)} ${safeText(row.unit_name)}</td><td><button class="btn" type="button" data-remove-product="${safeText(row.product_id)}" ${masterRoleIn(['owner'])?'':'disabled'}>ဖျက်/ပိတ်ရန်</button></td></tr>`}).join(''):'<tr><td colspan="7" class="master-empty">ကုန်ပစ္စည်း Master မရှိသေးပါ</td></tr>';let header=productCatalogBody.closest('table')?.querySelector('thead tr');if(header&&!header.querySelector('[data-master-action-head]'))header.insertAdjacentHTML('beforeend','<th data-master-action-head>လုပ်ဆောင်ချက်</th>')}
@@ -3507,5 +4075,1194 @@ document.addEventListener('click',event=>{let locked=event.target.closest?.('[da
 document.addEventListener('submit',event=>{if(event.target.matches?.('[data-pilot-write="locked"]')){event.preventDefault();event.stopImmediatePropagation();pilotWriteLockedMessage()}},true);
 document.querySelectorAll('[data-save]').forEach(x=>x.onclick=showToast);
 let initialToday=todayIso();advanceDate.value=initialToday;advanceDate.min=initialToday;advanceDate.max=initialToday;repayDate.value=initialToday;repayDate.min=initialToday;repayDate.max=initialToday;applyProductDefaults();syncInputSaleProducts(true);syncInputSaleReference();loan();initializeConsignmentUi();renderBags();renderOperations();applyPilotWriteGuards();initializeMarketPriceModule().catch(error=>{setMarketValidation('PC Local ဈေးနှုန်းမှတ်တမ်း ဖွင့်မရပါ · '+String(error?.message||error));console.error('Market price initialization failed',error)});initializeWeighingOfflineQueue().then(()=>initializeSupabaseIntegration()).catch(error=>{setSupabaseState('ERROR',supabaseFriendlyError(error));console.error('Weighing/Supabase initialization failed',error)});
+/* --------------------------------------------------------------------------
+   Farmer 360 Account Statement
+   -------------------------------------------------------------------------- */
 
+const farmerStatementState = {
+  customerId: null,
+  farmer: null,
+  loading: false,
+  rows: [],
+  raw: {
+    lots: [],
+    repayments: [],
+    weighing: [],
+    allocations: [],
+    consignmentLots: [],
+    consignmentSettlements: [],
+    cropSettlements: []
+  },
+  currentDebt: 0,
+  consignmentBalance: 0,
+  cashOut: 0,
+  cashIn: 0
+};
+
+const farmerStatementEl = id => document.getElementById(id);
+
+const farmerStatementNumber = value => {
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const farmerStatementIsoDate = value => {
+  const text = String(value || '').trim();
+
+  if (!text) {
+    return '';
+  }
+
+  return text.slice(0, 10);
+};
+
+const farmerStatementTimestamp = (date, createdAt) => {
+  const value = createdAt || (
+    date ? farmerStatementIsoDate(date) + 'T00:00:00.000Z' : ''
+  );
+
+  const timestamp = Date.parse(value);
+
+  return Number.isFinite(timestamp) ? timestamp : 0;
+};
+
+async function farmerStatementFetchAll(
+  table,
+  columns,
+  configureQuery
+) {
+  const result = [];
+  const pageSize = 1000;
+
+  for (let start = 0; ; start += pageSize) {
+    let query = supabaseClient
+      .from(table)
+      .select(columns);
+
+    if (typeof configureQuery === 'function') {
+      query = configureQuery(query);
+    }
+
+    const response = await query
+      .order('id', { ascending: true })
+      .range(start, start + pageSize - 1);
+
+    if (response.error) {
+      throw response.error;
+    }
+
+    const rows = response.data || [];
+    result.push(...rows);
+
+    if (rows.length < pageSize) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+async function farmerStatementFetchRepayments(lotIds) {
+  if (!lotIds.length) {
+    return [];
+  }
+
+  const result = [];
+  const chunkSize = 40;
+
+  for (let index = 0; index < lotIds.length; index += chunkSize) {
+    const chunk = lotIds.slice(index, index + chunkSize);
+
+    const rows = await farmerStatementFetchAll(
+      'advance_repayments',
+      [
+        'id',
+        'repayment_ref',
+        'advance_lot_id',
+        'payment_date',
+        'principal_kyat',
+        'interest_kyat',
+        'total_received_kyat',
+        'elapsed_days',
+        'half_month_steps',
+        'payment_method',
+        'payment_reference',
+        'remaining_principal_kyat',
+        'notes',
+        'created_at'
+      ].join(','),
+      query => query.in('advance_lot_id', chunk)
+    );
+
+    result.push(...rows);
+  }
+
+  return result;
+}
+
+function farmerStatementAddRow(rows, row) {
+  rows.push({
+    date: farmerStatementIsoDate(row.date),
+    createdAt: row.createdAt || null,
+    sortTime: farmerStatementTimestamp(row.date, row.createdAt),
+    sortOrder: farmerStatementNumber(row.sortOrder),
+    type: row.type || 'အခြား',
+    ref: row.ref || '—',
+    detail: row.detail || '—',
+    measure: row.measure || '—',
+    debtIncrease: Math.max(
+      0,
+      farmerStatementNumber(row.debtIncrease)
+    ),
+    debtDecrease: Math.max(
+      0,
+      farmerStatementNumber(row.debtDecrease)
+    ),
+    cashOut: Math.max(
+      0,
+      farmerStatementNumber(row.cashOut)
+    ),
+    cashIn: Math.max(
+      0,
+      farmerStatementNumber(row.cashIn)
+    ),
+    runningDebt: 0
+  });
+}
+
+function farmerStatementBuildRows(raw) {
+  const rows = [];
+  const lotMap = new Map(
+    raw.lots.map(lot => [lot.id, lot])
+  );
+
+  raw.lots.forEach(lot => {
+    const isGoods = lot.advance_type === 'GOODS';
+    const quantity = farmerStatementNumber(
+      lot.original_quantity
+    );
+
+    farmerStatementAddRow(rows, {
+      date: lot.issued_date,
+      createdAt: lot.created_at,
+      sortOrder: 10,
+      type: isGoods
+        ? 'ကုန်ပစ္စည်းယူမှု'
+        : 'စိုက်ထုတ်ငွေ',
+      ref: lot.advance_ref,
+      detail: isGoods
+        ? (
+          (lot.product_name_snapshot || 'ကုန်ပစ္စည်း') +
+          ' · တစ်ယူနစ် ' +
+          signedMoney(
+            farmerStatementNumber(lot.unit_price_kyat)
+          ) +
+          (lot.notes ? ' · ' + lot.notes : '')
+        )
+        : (
+          'ငွေသားစိုက်ထုတ်' +
+          (lot.notes ? ' · ' + lot.notes : '')
+        ),
+      measure: isGoods
+        ? (
+          mm(quantity) +
+          ' ' +
+          (lot.unit_name_snapshot || 'ယူနစ်')
+        )
+        : 'ငွေသား',
+      debtIncrease: farmerStatementNumber(
+        lot.original_principal_kyat
+      ),
+      cashOut: isGoods
+        ? 0
+        : farmerStatementNumber(
+          lot.original_principal_kyat
+        )
+    });
+  });
+
+  raw.repayments.forEach(repayment => {
+    const lot = lotMap.get(repayment.advance_lot_id);
+    const method = String(
+      repayment.payment_method || ''
+    ).toUpperCase();
+
+    const actualCashReceived = [
+      'CASH',
+      'BANK',
+      'MOBILE'
+    ].includes(method);
+
+    farmerStatementAddRow(rows, {
+      date: repayment.payment_date,
+      createdAt: repayment.created_at,
+      sortOrder: 20,
+      type: method === 'OFFSET'
+        ? 'အကြွေးဖြတ်ရှင်း'
+        : 'အကြွေးပြန်ဆပ်',
+      ref: repayment.repayment_ref,
+      detail:
+        'မူလ Lot ' +
+        (lot?.advance_ref || '—') +
+        ' · အရင်း ' +
+        signedMoney(
+          farmerStatementNumber(repayment.principal_kyat)
+        ) +
+        ' · အတိုး ' +
+        signedMoney(
+          farmerStatementNumber(repayment.interest_kyat)
+        ) +
+        ' · ' +
+        mm(
+          farmerStatementNumber(repayment.elapsed_days)
+        ) +
+        ' ရက် / ' +
+        mm(
+          farmerStatementNumber(
+            repayment.half_month_steps
+          )
+        ) +
+        ' လဝက်' +
+        (
+          repayment.notes
+            ? ' · ' + repayment.notes
+            : ''
+        ),
+      measure: lot?.advance_type === 'GOODS'
+        ? (
+          lot.product_name_snapshot ||
+          'ကုန်ပစ္စည်းအကြွေး'
+        )
+        : 'ငွေသားအကြွေး',
+      debtDecrease: farmerStatementNumber(
+        repayment.principal_kyat
+      ),
+      cashIn: actualCashReceived
+        ? farmerStatementNumber(
+          repayment.total_received_kyat
+        )
+        : 0
+    });
+  });
+
+  raw.weighing.forEach(batch => {
+    farmerStatementAddRow(rows, {
+      date: batch.business_date,
+      createdAt: batch.created_at,
+      sortOrder: 30,
+      type: 'အိတ်ချိန်',
+      ref: batch.voucher_ref || batch.batch_ref,
+      detail:
+        (batch.crop_name || 'သီးနှံ') +
+        ' · ' +
+        (batch.status || '—'),
+      measure:
+        mm(
+          farmerStatementNumber(batch.total_bags)
+        ) +
+        ' အိတ် · ' +
+        viss(
+          farmerStatementNumber(
+            batch.total_gross_weight_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ',
+      debtIncrease: 0,
+      debtDecrease: 0,
+      cashOut: 0,
+      cashIn: 0
+    });
+  });
+
+  raw.allocations.forEach(allocation => {
+    farmerStatementAddRow(rows, {
+      date:
+        allocation.accepted_business_date ||
+        allocation.business_date,
+      createdAt: allocation.accepted_at,
+      sortOrder: 40,
+      type: 'သီးနှံခွဲဝေမှု',
+      ref: allocation.allocation_ref,
+      detail:
+        (allocation.crop_name || 'သီးနှံ') +
+        ' · ချက်ချင်းရောင်း ' +
+        viss(
+          farmerStatementNumber(
+            allocation.sale_reserved_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ · အပ်ပဲ ' +
+        viss(
+          farmerStatementNumber(
+            allocation.consigned_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ',
+      measure:
+        mm(
+          farmerStatementNumber(
+            allocation.actual_bags
+          )
+        ) +
+        ' အိတ် · Net ' +
+        viss(
+          farmerStatementNumber(
+            allocation.net_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ'
+    });
+  });
+
+  raw.consignmentLots.forEach(lot => {
+    farmerStatementAddRow(rows, {
+      date: lot.business_date,
+      createdAt: lot.accepted_at,
+      sortOrder: 50,
+      type: 'အပ်ပဲအဝင်',
+      ref: lot.lot_ref,
+      detail:
+        (lot.crop_name || 'သီးနှံ') +
+        ' · လက်ရှိလက်ကျန် ' +
+        viss(
+          farmerStatementNumber(
+            lot.available_weight_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ · ' +
+        (lot.status || '—') +
+        (lot.notes ? ' · ' + lot.notes : ''),
+      measure:
+        mm(
+          farmerStatementNumber(lot.actual_bags)
+        ) +
+        ' အိတ် · ' +
+        viss(
+          farmerStatementNumber(
+            lot.original_net_weight_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ'
+    });
+  });
+
+  raw.cropSettlements.forEach(settlement => {
+    farmerStatementAddRow(rows, {
+      date: settlement.business_date,
+      createdAt: settlement.created_at,
+      sortOrder: 60,
+      type: 'သီးနှံငွေရှင်း',
+      ref: settlement.settlement_ref,
+      detail:
+        (settlement.crop_name_snapshot || 'သီးနှံ') +
+        ' · သီးနှံတန်ဖိုး ' +
+        signedMoney(
+          farmerStatementNumber(
+            settlement.gross_value_kyat
+          )
+        ) +
+        ' · ကုန်ကျစရိတ် ' +
+        signedMoney(
+          farmerStatementNumber(
+            settlement.total_expense_kyat
+          )
+        ) +
+        (
+          farmerStatementNumber(
+            settlement.debt_total_kyat
+          ) > 0
+            ? (
+              ' · အကြွေးဖြတ် ' +
+              signedMoney(
+                farmerStatementNumber(
+                  settlement.debt_total_kyat
+                )
+              )
+            )
+            : ''
+        ) +
+        (
+          settlement.notes
+            ? ' · ' + settlement.notes
+            : ''
+        ),
+      measure:
+        mm(
+          farmerStatementNumber(
+            settlement.actual_bags
+          )
+        ) +
+        ' အိတ် · ' +
+        viss(
+          farmerStatementNumber(
+            settlement.purchased_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ',
+      cashOut: farmerStatementNumber(
+        settlement.payable_kyat
+      )
+    });
+  });
+
+  raw.consignmentSettlements.forEach(settlement => {
+    farmerStatementAddRow(rows, {
+      date: settlement.business_date,
+      createdAt: settlement.created_at,
+      sortOrder: 70,
+      type: 'အပ်ပဲဖြတ်ငွေရှင်း',
+      ref: settlement.settlement_ref,
+      detail:
+        (settlement.crop_name_snapshot || 'သီးနှံ') +
+        ' · သီးနှံတန်ဖိုး ' +
+        signedMoney(
+          farmerStatementNumber(
+            settlement.gross_value_kyat
+          )
+        ) +
+        ' · ကုန်ကျစရိတ် ' +
+        signedMoney(
+          farmerStatementNumber(
+            settlement.total_expense_kyat
+          )
+        ) +
+        (
+          farmerStatementNumber(
+            settlement.debt_total_kyat
+          ) > 0
+            ? (
+              ' · အကြွေးဖြတ် ' +
+              signedMoney(
+                farmerStatementNumber(
+                  settlement.debt_total_kyat
+                )
+              )
+            )
+            : ''
+        ) +
+        (
+          settlement.notes
+            ? ' · ' + settlement.notes
+            : ''
+        ),
+      measure:
+        viss(
+          farmerStatementNumber(
+            settlement.settled_centi_pyitha
+          )
+        ) +
+        ' ပိဿာ',
+      cashOut: farmerStatementNumber(
+        settlement.payable_kyat
+      )
+    });
+  });
+
+  rows.sort((left, right) => {
+    const dateCompare = String(left.date).localeCompare(
+      String(right.date)
+    );
+
+    if (dateCompare !== 0) {
+      return dateCompare;
+    }
+
+    if (left.sortTime !== right.sortTime) {
+      return left.sortTime - right.sortTime;
+    }
+
+    if (left.sortOrder !== right.sortOrder) {
+      return left.sortOrder - right.sortOrder;
+    }
+
+    return String(left.ref).localeCompare(
+      String(right.ref)
+    );
+  });
+
+  let runningDebt = 0;
+
+  rows.forEach(row => {
+    runningDebt += row.debtIncrease;
+    runningDebt -= row.debtDecrease;
+    runningDebt = Math.max(0, runningDebt);
+    row.runningDebt = runningDebt;
+  });
+
+  return rows;
+}
+
+async function loadFarmerStatement(
+  customerId,
+  { scroll = true } = {}
+) {
+  const panel = farmerStatementEl(
+    'farmerStatementPanel'
+  );
+
+  const status = farmerStatementEl(
+    'farmerStatementStatus'
+  );
+
+  const farmer = masterState.farmers.find(
+    row => row.customer_id === customerId
+  );
+
+  if (!farmer) {
+    throw new Error(
+      'ရွေးထားသော တောင်သူ Master Data မတွေ့ပါ'
+    );
+  }
+
+  if (!supabaseClient || !activeStaffReady()) {
+    throw new Error(
+      'ဝန်ထမ်း Login ဝင်ပြီးမှ စာရင်းရှင်းတမ်း ဖတ်နိုင်သည်'
+    );
+  }
+
+  farmerStatementState.customerId = customerId;
+  farmerStatementState.farmer = farmer;
+  farmerStatementState.loading = true;
+
+  panel.hidden = false;
+  status.className = 'farmer-statement-status loading';
+  status.textContent =
+    farmer.full_name +
+    ' ၏ Server စာရင်းအားလုံး ဖတ်နေသည်…';
+
+  if (scroll) {
+    panel.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
+  try {
+    const [
+      lots,
+      weighing,
+      allocations,
+      consignmentLots,
+      consignmentSettlements,
+      cropSettlements
+    ] = await Promise.all([
+      farmerStatementFetchAll(
+        'advance_lots',
+        [
+          'id',
+          'advance_ref',
+          'customer_id',
+          'advance_type',
+          'product_name_snapshot',
+          'unit_name_snapshot',
+          'unit_price_kyat',
+          'original_quantity',
+          'remaining_quantity',
+          'original_principal_kyat',
+          'remaining_principal_kyat',
+          'monthly_interest_rate',
+          'issued_date',
+          'status',
+          'notes',
+          'created_at'
+        ].join(','),
+        query => query.eq('customer_id', customerId)
+      ),
+
+      farmerStatementFetchAll(
+        'weighing_batches',
+        [
+          'id',
+          'batch_ref',
+          'voucher_ref',
+          'business_date',
+          'customer_id',
+          'customer_name',
+          'crop_name',
+          'status',
+          'total_bags',
+          'total_gross_weight_centi_pyitha',
+          'created_at'
+        ].join(','),
+        query => query.eq('customer_id', customerId)
+      ),
+
+      farmerStatementFetchAll(
+        'intake_allocations',
+        [
+          'id',
+          'allocation_ref',
+          'business_date',
+          'accepted_business_date',
+          'customer_id',
+          'customer_name',
+          'crop_name',
+          'actual_bags',
+          'gross_centi_pyitha',
+          'net_centi_pyitha',
+          'sale_reserved_centi_pyitha',
+          'consigned_centi_pyitha',
+          'sale_state',
+          'notes',
+          'accepted_at'
+        ].join(','),
+        query => query.eq('customer_id', customerId)
+      ),
+
+      farmerStatementFetchAll(
+        'consignment_lots',
+        [
+          'id',
+          'lot_ref',
+          'business_date',
+          'customer_id',
+          'customer_name',
+          'crop_name',
+          'actual_bags',
+          'original_net_weight_centi_pyitha',
+          'available_weight_centi_pyitha',
+          'status',
+          'notes',
+          'accepted_at'
+        ].join(','),
+        query => query.eq('customer_id', customerId)
+      ),
+
+      farmerStatementFetchAll(
+        'consignment_settlements',
+        [
+          'id',
+          'settlement_ref',
+          'consignment_lot_id',
+          'business_date',
+          'customer_id',
+          'farmer_name_snapshot',
+          'crop_name_snapshot',
+          'settled_centi_pyitha',
+          'gross_value_kyat',
+          'total_expense_kyat',
+          'debt_principal_kyat',
+          'debt_interest_kyat',
+          'debt_total_kyat',
+          'payable_kyat',
+          'payment_method',
+          'notes',
+          'created_at'
+        ].join(','),
+        query => query.eq('customer_id', customerId)
+      ),
+
+      farmerStatementFetchAll(
+        'crop_settlements',
+        [
+          'id',
+          'settlement_ref',
+          'batch_id',
+          'business_date',
+          'customer_id',
+          'farmer_name_snapshot',
+          'crop_name_snapshot',
+          'purchased_centi_pyitha',
+          'actual_bags',
+          'gross_value_kyat',
+          'total_expense_kyat',
+          'debt_principal_kyat',
+          'debt_interest_kyat',
+          'debt_total_kyat',
+          'payable_kyat',
+          'payment_method',
+          'notes',
+          'created_at'
+        ].join(','),
+        query => query.eq('customer_id', customerId)
+      )
+    ]);
+
+    const repayments =
+      await farmerStatementFetchRepayments(
+        lots.map(lot => lot.id)
+      );
+
+    const raw = {
+      lots,
+      repayments,
+      weighing,
+      allocations,
+      consignmentLots,
+      consignmentSettlements,
+      cropSettlements
+    };
+
+    const rows = farmerStatementBuildRows(raw);
+
+    farmerStatementState.raw = raw;
+    farmerStatementState.rows = rows;
+
+    farmerStatementState.currentDebt =
+      lots.reduce(
+        (total, lot) =>
+          total +
+          farmerStatementNumber(
+            lot.remaining_principal_kyat
+          ),
+        0
+      );
+
+    farmerStatementState.consignmentBalance =
+      consignmentLots.reduce(
+        (total, lot) =>
+          total +
+          farmerStatementNumber(
+            lot.available_weight_centi_pyitha
+          ),
+        0
+      );
+
+    farmerStatementState.cashOut =
+      rows.reduce(
+        (total, row) => total + row.cashOut,
+        0
+      );
+
+    farmerStatementState.cashIn =
+      rows.reduce(
+        (total, row) => total + row.cashIn,
+        0
+      );
+
+    farmerStatementState.loading = false;
+
+    renderFarmerStatement();
+
+    status.className =
+      'farmer-statement-status success';
+
+    status.textContent =
+      '✓ ' +
+      farmer.full_name +
+      ' ၏ စာရင်း ' +
+      mm(rows.length) +
+      ' ခုကို ရက်စွဲအလိုက် စီပြီးပါပြီ';
+  } catch (error) {
+    farmerStatementState.loading = false;
+
+    status.className =
+      'farmer-statement-status error';
+
+    status.textContent =
+      'စာရင်းရှင်းတမ်း ဖတ်မရပါ · ' +
+      (
+        typeof supabaseFriendlyError === 'function'
+          ? supabaseFriendlyError(error)
+          : error.message
+      );
+
+    throw error;
+  }
+}
+  function farmerStatementDateText(value) {
+  const date = farmerStatementIsoDate(value);
+  return date || '—';
+}
+
+function farmerStatementGeneratedText() {
+  return new Intl.DateTimeFormat(
+    'en-GB-u-ca-gregory',
+    {
+      timeZone: 'Asia/Yangon',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23'
+    }
+  ).format(new Date());
+}
+
+function farmerStatementMoneyCell(value, className) {
+  const amount = farmerStatementNumber(value);
+
+  if (amount <= 0) {
+    return '—';
+  }
+
+  return (
+    '<span class="' +
+    safeText(className || '') +
+    '">' +
+    safeText(signedMoney(amount)) +
+    '</span>'
+  );
+}
+
+function farmerStatementRowHtml(row) {
+  return `
+    <tr>
+      <td>${safeText(farmerStatementDateText(row.date))}</td>
+
+      <td>
+        <span class="farmer-statement-type">
+          ${safeText(row.type)}
+        </span>
+      </td>
+
+      <td>
+        <span class="farmer-statement-ref">
+          ${safeText(row.ref)}
+        </span>
+      </td>
+
+      <td>${safeText(row.detail)}</td>
+
+      <td>${safeText(row.measure)}</td>
+
+      <td>
+        ${farmerStatementMoneyCell(
+          row.debtIncrease,
+          'farmer-statement-money-out'
+        )}
+      </td>
+
+      <td>
+        ${farmerStatementMoneyCell(
+          row.debtDecrease,
+          'farmer-statement-money-in'
+        )}
+      </td>
+
+      <td>
+        ${farmerStatementMoneyCell(
+          row.cashOut,
+          'farmer-statement-money-out'
+        )}
+      </td>
+
+      <td>
+        ${farmerStatementMoneyCell(
+          row.cashIn,
+          'farmer-statement-money-in'
+        )}
+      </td>
+
+      <td>
+        <b>${safeText(signedMoney(row.runningDebt))}</b>
+      </td>
+    </tr>
+  `;
+}
+
+function farmerStatementAddress(farmer) {
+  const parts = [
+    farmer.address,
+    farmer.village,
+    farmer.township
+  ]
+    .map(value => String(value || '').trim())
+    .filter(Boolean);
+
+  return [...new Set(parts)].join('၊ ') || '—';
+}
+
+function farmerStatementPeriod(rows) {
+  if (!rows.length) {
+    return 'စာရင်းမရှိသေးပါ';
+  }
+
+  const firstDate = farmerStatementDateText(
+    rows[0].date
+  );
+
+  const lastDate = farmerStatementDateText(
+    rows[rows.length - 1].date
+  );
+
+  if (firstDate === lastDate) {
+    return firstDate;
+  }
+
+  return firstDate + ' မှ ' + lastDate + ' အထိ';
+}
+
+function renderFarmerStatementPrint() {
+  const state = farmerStatementState;
+  const farmer = state.farmer;
+
+  if (!farmer) {
+    return;
+  }
+
+  const generatedText = farmerStatementGeneratedText();
+  const address = farmerStatementAddress(farmer);
+  const phone =
+    farmer.phone_display ||
+    farmer.phone_normalized ||
+    '—';
+
+  farmerStatementEl(
+    'farmerStatementPrintGeneratedAt'
+  ).textContent = 'ထုတ်သည့်အချိန် — ' + generatedText;
+
+  farmerStatementEl(
+    'farmerStatementPrintCustomerId'
+  ).textContent = farmer.customer_id;
+
+  farmerStatementEl(
+    'farmerStatementPrintName'
+  ).textContent = farmer.full_name || '—';
+
+  farmerStatementEl(
+    'farmerStatementPrintPhone'
+  ).textContent = phone;
+
+  farmerStatementEl(
+    'farmerStatementPrintAddress'
+  ).textContent = address;
+
+  farmerStatementEl(
+    'farmerStatementPrintPeriod'
+  ).textContent = farmerStatementPeriod(state.rows);
+
+  farmerStatementEl(
+    'farmerStatementPrintDebt'
+  ).textContent = signedMoney(state.currentDebt);
+
+  farmerStatementEl(
+    'farmerStatementPrintConsignment'
+  ).textContent =
+    viss(state.consignmentBalance) + ' ပိဿာ';
+
+  farmerStatementEl(
+    'farmerStatementPrintCashOut'
+  ).textContent = signedMoney(state.cashOut);
+
+  farmerStatementEl(
+    'farmerStatementPrintCashIn'
+  ).textContent = signedMoney(state.cashIn);
+
+  farmerStatementEl(
+    'farmerStatementPrintCount'
+  ).textContent = mm(state.rows.length);
+
+  farmerStatementEl(
+    'farmerStatementPrintBody'
+  ).innerHTML = state.rows.length
+    ? state.rows
+        .map(farmerStatementRowHtml)
+        .join('')
+    : `
+      <tr>
+        <td colspan="10" style="text-align:center">
+          ဤတောင်သူအတွက် စာရင်းမရှိသေးပါ
+        </td>
+      </tr>
+    `;
+}
+
+function renderFarmerStatement() {
+  const state = farmerStatementState;
+  const farmer = state.farmer;
+
+  if (!farmer) {
+    return;
+  }
+
+  const phone =
+    farmer.phone_display ||
+    farmer.phone_normalized ||
+    'ဖုန်းမရှိ';
+
+  const location = [
+    farmer.village,
+    farmer.township
+  ]
+    .filter(Boolean)
+    .join('၊ ');
+
+  farmerStatementEl(
+    'farmerStatementTitle'
+  ).textContent =
+    farmer.customer_id +
+    ' · ' +
+    farmer.full_name +
+    ' စာရင်းရှင်းတမ်း';
+
+  farmerStatementEl(
+    'farmerStatementMeta'
+  ).textContent =
+    phone +
+    (location ? ' · ' + location : '') +
+    ' · ' +
+    farmerStatementPeriod(state.rows);
+
+  farmerStatementEl(
+    'farmerStatementDebt'
+  ).textContent = signedMoney(state.currentDebt);
+
+  farmerStatementEl(
+    'farmerStatementConsignment'
+  ).textContent =
+    viss(state.consignmentBalance) + ' ပိဿာ';
+
+  farmerStatementEl(
+    'farmerStatementCashOut'
+  ).textContent = signedMoney(state.cashOut);
+
+  farmerStatementEl(
+    'farmerStatementCashIn'
+  ).textContent = signedMoney(state.cashIn);
+
+  farmerStatementEl(
+    'farmerStatementCount'
+  ).textContent = mm(state.rows.length);
+
+  farmerStatementEl(
+    'farmerStatementGeneratedAt'
+  ).textContent =
+    'နောက်ဆုံးပြန်ဖတ်ချိန် — ' +
+    farmerStatementGeneratedText();
+
+  farmerStatementEl(
+    'farmerStatementBody'
+  ).innerHTML = state.rows.length
+    ? state.rows
+        .map(farmerStatementRowHtml)
+        .join('')
+    : `
+      <tr>
+        <td colspan="10" class="master-empty">
+          ဤတောင်သူအတွက် စာရင်းမရှိသေးပါ
+        </td>
+      </tr>
+    `;
+
+  renderFarmerStatementPrint();
+}
+
+let farmerStatementPrintCleanupTimer = null;
+
+function printCurrentFarmerStatement() {
+  const state = farmerStatementState;
+
+  if (!state.farmer || state.loading) {
+    toast.textContent =
+      'တောင်သူစာရင်းကို အရင်ဖတ်ပါ';
+    showToast();
+    return;
+  }
+
+  renderFarmerStatementPrint();
+
+  let pageStyle = document.getElementById(
+    'farmer-statement-page-style'
+  );
+
+  if (!pageStyle) {
+    pageStyle = document.createElement('style');
+    pageStyle.id = 'farmer-statement-page-style';
+    document.head.appendChild(pageStyle);
+  }
+
+  pageStyle.textContent = `
+    @page {
+      size: A4 landscape;
+      margin: 9mm;
+    }
+  `;
+
+  document.body.classList.add(
+    'printing-farmer-statement'
+  );
+
+  const cleanup = () => {
+    document.body.classList.remove(
+      'printing-farmer-statement'
+    );
+
+    document.getElementById(
+      'farmer-statement-page-style'
+    )?.remove();
+
+    if (farmerStatementPrintCleanupTimer) {
+      clearTimeout(
+        farmerStatementPrintCleanupTimer
+      );
+
+      farmerStatementPrintCleanupTimer = null;
+    }
+  };
+
+  window.addEventListener(
+    'afterprint',
+    cleanup,
+    { once: true }
+  );
+
+  farmerStatementPrintCleanupTimer = setTimeout(
+    cleanup,
+    120000
+  );
+
+  setTimeout(() => {
+    window.print();
+  }, 120);
+}
+
+const farmerStatementTable = farmerStatementEl(
+  'farmerTableBody'
+);
+
+farmerStatementTable?.addEventListener(
+  'click',
+  event => {
+    const button = event.target.closest(
+      '[data-view-farmer-statement]'
+    );
+
+    if (!button) {
+      return;
+    }
+
+    loadFarmerStatement(
+      button.dataset.viewFarmerStatement
+    ).catch(() => {});
+  }
+);
+
+farmerStatementEl(
+  'refreshFarmerStatement'
+)?.addEventListener(
+  'click',
+  () => {
+    if (!farmerStatementState.customerId) {
+      toast.textContent =
+        'တောင်သူနာမည်ကို အရင်ရွေးပါ';
+      showToast();
+      return;
+    }
+
+    loadFarmerStatement(
+      farmerStatementState.customerId,
+      { scroll: false }
+    ).catch(() => {});
+  }
+);
+
+farmerStatementEl(
+  'closeFarmerStatement'
+)?.addEventListener(
+  'click',
+  () => {
+    farmerStatementEl(
+      'farmerStatementPanel'
+    ).hidden = true;
+  }
+);
+
+farmerStatementEl(
+  'printFarmerStatement'
+)?.addEventListener(
+  'click',
+  printCurrentFarmerStatement
+);
 </script></body></html>
