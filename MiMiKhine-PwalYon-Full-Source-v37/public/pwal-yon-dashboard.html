@@ -1019,7 +1019,7 @@ active          BOOLEAN</code></div></div>
           <th>Reference</th>
           <th>အကြောင်းအရာ</th>
           <th>အိတ် / ပိဿာ / ပစ္စည်း</th>
-<th>စာရင်းတန်ဖိုး</th>
+<th>ပစ္စည်း/ဖြတ်စာရင်းတန်ဖိုး</th>
 <th>တောင်သူထံပေးငွေ</th>
 <th>တောင်သူထံမှလက်ခံငွေ</th>
 <th>အကြွေးလက်ကျန်</th>
@@ -1288,7 +1288,7 @@ active          BOOLEAN</code></div></div>
         <th>Reference</th>
         <th>အကြောင်းအရာ</th>
         <th>အိတ် / ပိဿာ / ပစ္စည်း</th>
-<th>စာရင်းတန်ဖိုး</th>
+<th>ပစ္စည်း/ဖြတ်စာရင်းတန်ဖိုး</th>
 <th>တောင်သူထံပေးငွေ</th>
 <th>တောင်သူထံမှလက်ခံငွေ</th>
 <th>အကြွေးလက်ကျန်</th>
@@ -4941,10 +4941,11 @@ function farmerStatementMoneyCell(value, className) {
 
 function farmerStatementRowHtml(row) {
   const ledgerValue =
-    row.debtIncrease > 0
+  row.cashOut > 0 || row.cashIn > 0
+    ? 0
+    : row.debtIncrease > 0
       ? row.debtIncrease
       : row.debtDecrease;
-
   return `
     <tr>
       <td>
