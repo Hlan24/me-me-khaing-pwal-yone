@@ -995,12 +995,12 @@ active          BOOLEAN</code></div></div>
     </div>
 
     <div>
-      <small>တောင်သူထံ ပေးငွေစုစုပေါင်း</small>
+      <small>တောင်သူထံ ငွေသားပေးစုစုပေါင်း</small>
       <b id="farmerStatementCashOut">ကျပ် ၀</b>
     </div>
 
     <div>
-      <small>တောင်သူထံမှ လက်ခံငွေစုစုပေါင်း</small>
+      <small>တောင်သူထံမှ ငွေသားလက်ခံစုစုပေါင်း</small>
       <b id="farmerStatementCashIn">ကျပ် ၀</b>
     </div>
 
@@ -1019,16 +1019,16 @@ active          BOOLEAN</code></div></div>
           <th>Reference</th>
           <th>အကြောင်းအရာ</th>
           <th>အိတ် / ပိဿာ / ပစ္စည်း</th>
-<th>ပစ္စည်း/ဖြတ်စာရင်းတန်ဖိုး</th>
-<th>တောင်သူထံပေးငွေ</th>
-<th>တောင်သူထံမှလက်ခံငွေ</th>
+
+<th>ပေးငွေ/ပစ္စည်းတန်ဖိုး</th>
+<th>လက်ခံ/ဖြတ်ငွေ</th>
 <th>အကြွေးလက်ကျန်</th>
         </tr>
       </thead>
 
       <tbody id="farmerStatementBody">
         <tr>
-          <td colspan="9" class="master-empty">
+          <td colspan="8" class="master-empty">
             တောင်သူနာမည်ကို နှိပ်ပြီး စာရင်းရှင်းတမ်းကြည့်ပါ
           </td>
         </tr>
@@ -1269,15 +1269,14 @@ active          BOOLEAN</code></div></div>
   </section>
 
   <table>
-  <colgroup>
-  <col style="width:8%">
-  <col style="width:10%">
-  <col style="width:11%">
-  <col style="width:21%">
-  <col style="width:11%">
-  <col style="width:10%">
+ <colgroup>
   <col style="width:9%">
-  <col style="width:9%">
+  <col style="width:11%">
+  <col style="width:12%">
+  <col style="width:25%">
+  <col style="width:12%">
+  <col style="width:10%">
+  <col style="width:10%">
   <col style="width:11%">
 </colgroup>
 
@@ -4940,12 +4939,16 @@ function farmerStatementMoneyCell(value, className) {
 }
 
 function farmerStatementRowHtml(row) {
-  const ledgerValue =
-  row.cashOut > 0 || row.cashIn > 0
-    ? 0
-    : row.debtIncrease > 0
+  const givenValue =
+    row.debtIncrease > 0
       ? row.debtIncrease
+      : row.cashOut;
+
+  const receivedValue =
+    row.cashIn > 0
+      ? row.cashIn
       : row.debtDecrease;
+
   return `
     <tr>
       <td>
@@ -4974,21 +4977,14 @@ function farmerStatementRowHtml(row) {
 
       <td>
         ${farmerStatementMoneyCell(
-          ledgerValue,
-          'farmer-statement-ledger-value'
-        )}
-      </td>
-
-      <td>
-        ${farmerStatementMoneyCell(
-          row.cashOut,
+          givenValue,
           'farmer-statement-money-out'
         )}
       </td>
 
       <td>
         ${farmerStatementMoneyCell(
-          row.cashIn,
+          receivedValue,
           'farmer-statement-money-in'
         )}
       </td>
@@ -5001,7 +4997,6 @@ function farmerStatementRowHtml(row) {
     </tr>
   `;
 }
-
 function farmerStatementAddress(farmer) {
   const parts = [
     farmer.address,
@@ -5102,7 +5097,7 @@ function renderFarmerStatementPrint() {
         .join('')
     : `
       <tr>
-        <td colspan="9" style="text-align:center">
+        <td colspan="8" style="text-align:center">
           ဤတောင်သူအတွက် စာရင်းမရှိသေးပါ
         </td>
       </tr>
@@ -5180,7 +5175,7 @@ function renderFarmerStatement() {
         .join('')
     : `
       <tr>
-        <td colspan="9" class="master-empty">
+        <td colspan="8" class="master-empty">
           ဤတောင်သူအတွက် စာရင်းမရှိသေးပါ
         </td>
       </tr>
