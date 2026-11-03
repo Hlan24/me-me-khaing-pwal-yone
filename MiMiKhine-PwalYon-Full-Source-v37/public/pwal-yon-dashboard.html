@@ -5330,4 +5330,918 @@ farmerStatementEl(
   'click',
   printCurrentFarmerStatement
 );
+  <script>
+/* =========================================================
+   MULTI-LOT ADVANCE REPAYMENT
+   One RP voucher + one Cash Book entry for many advance lots
+   ========================================================= */
+(() => {
+  function batchRepaymentContainer() {
+    return document.getElementById('repayBatchLines');
+  }
+
+  function batchMoney(value) {
+    return signedMoney(Math.max(0, Math.round(Number(value) || 0)));
+  }
+
+  function batchInputState() {
+    const result = new Map();
+
+    document
+      .querySelectorAll('#repayBatchLines [data-repay-batch-input]')
+      .forEach(input => {
+        const row = input.closest('tr');
+        const checkbox = row?.querySelector('[data-repay-batch-select]');
+
+        result.set(input.dataset.lotId, {
+          selected: Boolean(checkbox?.checked),
+          value: input.value
+        });
+      });
+
+    return result;
+  }
+
+  function batchClearSelections() {
+    document
+      .querySelectorAll('#repayBatchLines [data-repay-batch-select]')
+      .forEach(input => {
+        input.checked = false;
+      });
+
+    document
+      .querySelectorAll('#repayBatchLines [data-repay-batch-input]')
+      .forEach(input => {
+        input.value = '';
+        input.disabled = true;
+      });
+  }
+
+  function batchPaymentFarmer() {
+    const raw = repayAdvanceFarmer.value || '';
+    const customerId = raw.split('|')[0] || '';
+
+    if (!customerId) {
+      return null;
+    }
+
+    const lot = advanceLots.find(
+      item => item.customerId === customerId
+    );
+
+    return {
+      customerId,
+      farmerName:
+        lot?.farmerName ||
+        raw.split('|').slice(1).join('|') ||
+        '—'
+    };
+  }
+
+  function batchOpenLots() {
+    const farmer = batchPaymentFarmer();
+
+    if (!farmer) {
+      return [];
+    }
+
+    return openAdvanceLots(farmer.customerId)
+      .slice()
+      .sort((a, b) => {
+        const dateOrder = String(a.issuedDate).localeCompare(
+          String(b.issuedDate)
+        );
+
+        return dateOrder || String(a.id).localeCompare(String(b.id));
+      });
+  }
+
+  function mountBatchRepaymentUi() {
+    const oldLotField = repayAdvanceLot?.closest('.field');
+
+    if (oldLotField && !document.getElementById('repayBatchLines')) {
+      oldLotField.outerHTML = `
+        <div class="field full" id="repayBatchLinesField">
+          <label>
+            ပြန်ဆပ်မည့် စိုက်ထုတ်စာရင်းများ
+          </label>
+
+          <div
+            id="repayBatchLines"
+            class="advance-table-wrap"
+            style="margin-top:8px"
+          >
+            <div
+              style="
+                padding:14px;
+                color:var(--muted);
+                text-align:center
+              "
+            >
+              တောင်သူရွေးပြီးနောက် စိုက်ထုတ်စာရင်းများ ပေါ်လာပါမည်
+            </div>
+          </div>
+
+          <small
+            style="
+              display:block;
+              margin-top:8px;
+              color:var(--muted)
+            "
+          >
+            ဆပ်လိုသည့်စာရင်းများကို အမှန်ခြစ်ရွေးပြီး
+            တစ်စာရင်းချင်းအလိုက် ဆပ်ငွေ/အရေအတွက်ထည့်ပါ။
+            ရွေးထားသော စာရင်းအားလုံးကို RP ဘောင်ချာတစ်စောင်တည်းဖြင့်
+            သိမ်းပါမည်။
+          </small>
+        </div>
+      `;
+    }
+
+    document.getElementById('repayGoodsField')?.remove();
+    document.getElementById('repayCashField')?.remove();
+
+    const issueLabel = repayIssueOutput?.previousElementSibling;
+    const periodLabel = repayDaysOutput?.previousElementSibling;
+    const principalLabel = repayPrincipalOutput?.previousElementSibling;
+    const interestLabel = repayInterestOutput?.previousElementSibling;
+    const totalLabel = repayTotalOutput?.previousElementSibling;
+    const remainingLabel = repayRemainingOutput?.previousElementSibling;
+
+    if (issueLabel) {
+      issueLabel.textContent = 'ရွေးထားသော စိုက်ထုတ်စာရင်း';
+    }
+
+    if (periodLabel) {
+      periodLabel.textContent = 'အတိုးတွက်ချက်မှု';
+    }
+
+    if (principalLabel) {
+      principalLabel.textContent = 'ရွေးထားသော အရင်းစုစုပေါင်း';
+    }
+
+    if (interestLabel) {
+      interestLabel.textContent = 'ရွေးထားသော အတိုးစုစုပေါင်း';
+    }
+
+    if (totalLabel) {
+      totalLabel.textContent = 'လက်ခံရမည့် စုစုပေါင်း';
+    }
+
+    if (remainingLabel) {
+      remainingLabel.textContent = 'ဆပ်ပြီးနောက် စာရင်းအခြေအနေ';
+    }
+
+    const example = document.querySelector(
+      '#advanceRepaymentPanel .advance-example'
+    );
+
+    if (example) {
+      example.innerHTML = `
+        <b>အများစာရင်း တစ်ဘောင်ချာစနစ်</b>
+        — တောင်သူတစ်ယောက်၏ စိုက်ထုတ်စာရင်းများစွာမှ
+        ဆပ်လိုသည့် lot များကိုရွေးပြီး RP ဘောင်ချာတစ်စောင်တည်းဖြင့်
+        လက်ခံနိုင်သည်။ Lot တစ်ခုချင်းစီ၏ ထုတ်ရက်၊
+        လစဉ်အတိုးနှုန်းနှင့် ကျန်အရင်းအလိုက်
+        Server က သီးခြားတွက်ပေးမည်။
+      `;
+    }
+  }
+
+  function renderBatchRepaymentLots() {
+    const container = batchRepaymentContainer();
+
+    if (!container) {
+      return;
+    }
+
+    const previous = batchInputState();
+    const lots = batchOpenLots();
+
+    if (!lots.length) {
+      container.innerHTML = `
+        <div
+          style="
+            padding:14px;
+            color:var(--muted);
+            text-align:center
+          "
+        >
+          ရွေးထားသော တောင်သူတွင် ဆပ်ရန်
+          စိုက်ထုတ်လက်ကျန် မရှိပါ
+        </div>
+      `;
+
+      repaymentCalculation();
+      return;
+    }
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th style="width:74px">ရွေးရန်</th>
+            <th>စိုက်ထုတ်စာရင်း</th>
+            <th>ထုတ်ရက်</th>
+            <th>အမျိုးအစား / လက်ကျန်</th>
+            <th style="min-width:150px">
+              ယခုဆပ်မည့် အရင်း / အရေအတွက်
+            </th>
+            <th>အတိုး</th>
+            <th>ယခုလက်ခံငွေ</th>
+            <th>ဆပ်ပြီးလက်ကျန်</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${lots.map(lot => {
+            const state = previous.get(lot.id) || {
+              selected: false,
+              value: ''
+            };
+
+            const isGoods = lot.type === 'GOODS';
+
+            const inputLabel = isGoods
+              ? `ပမာဏ (${safeText(lot.unit || 'ခု')})`
+              : 'အရင်းငွေ (ကျပ်)';
+
+            const remaining = isGoods
+              ? `${mm(lot.remainingQty)} ${safeText(lot.unit || 'ခု')} / ${batchMoney(lot.remainingPrincipal)}`
+              : batchMoney(lot.remainingPrincipal);
+
+            const inputMin = isGoods
+              ? (lot.wholeUnits ? '1' : '0.001')
+              : '1';
+
+            const inputStep = isGoods
+              ? (lot.wholeUnits ? '1' : '0.001')
+              : '1';
+
+            const typeLabel = isGoods
+              ? 'ကုန်ပစ္စည်းအကြွေး'
+              : 'ငွေသားအကြွေး';
+
+            return `
+              <tr data-repay-batch-row="${safeText(lot.id)}">
+                <td>
+                  <label
+                    style="
+                      display:flex;
+                      align-items:center;
+                      gap:6px;
+                      white-space:nowrap
+                    "
+                  >
+                    <input
+                      type="checkbox"
+                      data-repay-batch-select
+                      data-lot-id="${safeText(lot.id)}"
+                      ${state.selected ? 'checked' : ''}
+                    >
+                    ရွေး
+                  </label>
+                </td>
+
+                <td>
+                  <b>${safeText(lot.id)}</b>
+                  <small
+                    style="
+                      display:block;
+                      color:var(--muted);
+                      margin-top:3px
+                    "
+                  >
+                    ${safeText(lot.itemName || 'ငွေသား')}
+                  </small>
+                </td>
+
+                <td>${formatAdvanceDate(lot.issuedDate)}</td>
+
+                <td>
+                  <b>${typeLabel}</b>
+                  <small
+                    style="
+                      display:block;
+                      color:var(--muted);
+                      margin-top:3px
+                    "
+                  >
+                    လက်ကျန် — ${remaining}
+                  </small>
+                </td>
+
+                <td>
+                  <label
+                    style="
+                      display:block;
+                      font-size:10px;
+                      color:var(--muted);
+                      margin-bottom:4px
+                    "
+                  >
+                    ${inputLabel}
+                  </label>
+
+                  <input
+                    type="number"
+                    min="${inputMin}"
+                    step="${inputStep}"
+                    inputmode="${isGoods ? 'decimal' : 'numeric'}"
+                    placeholder="${isGoods ? 'ဥပမာ — 1' : 'ဥပမာ — 100000'}"
+                    value="${safeText(state.value || '')}"
+                    data-repay-batch-input
+                    data-lot-id="${safeText(lot.id)}"
+                    data-lot-type="${safeText(lot.type)}"
+                    ${state.selected ? '' : 'disabled'}
+                  >
+                </td>
+
+                <td data-repay-batch-interest>—</td>
+                <td data-repay-batch-total>—</td>
+                <td data-repay-batch-remaining>—</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+
+    repaymentCalculation();
+  }
+
+  /* -------------------------------------------------------
+     ယခင် single dropdown function ကို batch table function ဖြင့်အစားထိုး
+     ------------------------------------------------------- */
+  syncRepaymentLots = function() {
+    renderBatchRepaymentLots();
+  };
+
+  function calculateBatchRepayment() {
+    const farmer = batchPaymentFarmer();
+    const paymentDate = repayDate.value;
+    const errors = [];
+    const lines = [];
+
+    const paymentStamp = dateSerial(paymentDate);
+    const businessStamp = dateSerial(todayIso());
+
+    if (!farmer) {
+      errors.push('တောင်သူကို ရွေးပါ');
+    }
+
+    if (!Number.isFinite(paymentStamp)) {
+      errors.push('ဆပ်သည့်ရက်ကို ရွေးပါ');
+    } else if (paymentStamp !== businessStamp) {
+      errors.push(
+        'ငွေစာရင်းတင်သည့်ရက်ကို ယနေ့ Server Business Date ဖြင့်သာ ထည့်ပါ'
+      );
+    }
+
+    if (
+      !['CASH', 'BANK', 'MOBILE'].includes(
+        repayPaymentMethod.value
+      )
+    ) {
+      errors.push('လက်ခံနည်းကို မှန်ကန်စွာရွေးပါ');
+    }
+
+    if (
+      repayPaymentMethod.value !== 'CASH'
+      && !repayReference.value.trim()
+    ) {
+      errors.push('ဘဏ် / Mobile Pay Reference ကို ထည့်ပါ');
+    }
+
+    const selectedRows = [
+      ...document.querySelectorAll(
+        '#repayBatchLines [data-repay-batch-select]:checked'
+      )
+    ];
+
+    if (!selectedRows.length) {
+      errors.push('ပြန်ဆပ်မည့် စိုက်ထုတ်စာရင်း အနည်းဆုံးတစ်ခုရွေးပါ');
+    }
+
+    selectedRows.forEach(checkbox => {
+      const lotId = checkbox.dataset.lotId;
+      const row = checkbox.closest('tr');
+      const input = row?.querySelector('[data-repay-batch-input]');
+      const lot = advanceLots.find(item => item.id === lotId);
+
+      const interestCell = row?.querySelector(
+        '[data-repay-batch-interest]'
+      );
+
+      const totalCell = row?.querySelector(
+        '[data-repay-batch-total]'
+      );
+
+      const remainingCell = row?.querySelector(
+        '[data-repay-batch-remaining]'
+      );
+
+      if (!lot || !lot.serverId) {
+        errors.push(`${lotId || 'ရွေးထားသောစာရင်း'} ၏ Server ID မရပါ`);
+        return;
+      }
+
+      const raw = input?.value.trim() || '';
+      const value = Number(raw);
+
+      if (!raw || !Number.isFinite(value) || value <= 0) {
+        errors.push(
+          `${lot.id} — ဆပ်မည့် ပမာဏ/အရင်းငွေကို ထည့်ပါ`
+        );
+
+        if (interestCell) interestCell.textContent = '—';
+        if (totalCell) totalCell.textContent = '—';
+        if (remainingCell) remainingCell.textContent = '—';
+
+        return;
+      }
+
+      const days = Number.isFinite(paymentStamp)
+        ? elapsedDays(lot.issuedDate, paymentDate)
+        : 0;
+
+      if (days < 0) {
+        errors.push(
+          `${lot.id} — ဆပ်သည့်ရက်သည် ထုတ်ပေးသည့်ရက် မတိုင်မီ မဖြစ်ရပါ`
+        );
+
+        return;
+      }
+
+      let principal = 0;
+      let selectedQuantity = null;
+      let remainingPrincipal = 0;
+      let remainingQuantity = null;
+
+      if (lot.type === 'GOODS') {
+        const quantity = Math.round(value * 1000) / 1000;
+
+        if (Math.abs(value - quantity) > 0.0000001) {
+          errors.push(
+            `${lot.id} — ပစ္စည်းအရေအတွက်ကို ဒဿမ ၃ လုံးအထိသာ ထည့်ပါ`
+          );
+
+          return;
+        }
+
+        if (lot.wholeUnits && quantity !== Math.trunc(quantity)) {
+          errors.push(
+            `${lot.id} — ${lot.itemName} ကို ကိန်းပြည့်အရေအတွက်ဖြင့်သာ ဆပ်နိုင်သည်`
+          );
+
+          return;
+        }
+
+        if (quantity > lot.remainingQty + 0.0001) {
+          errors.push(
+            `${lot.id} — လက်ကျန် ${mm(lot.remainingQty)} ${lot.unit} ထက် မကျော်ရပါ`
+          );
+
+          return;
+        }
+
+        const closesLot =
+          Math.abs(quantity - lot.remainingQty) <= 0.0001;
+
+        principal = closesLot
+          ? lot.remainingPrincipal
+          : Math.round(quantity * lot.unitPrice);
+
+        if (
+          principal <= 0
+          || principal > lot.remainingPrincipal
+        ) {
+          errors.push(
+            `${lot.id} — ရွေးထားသော ပစ္စည်းတန်ဖိုး မမှန်ပါ`
+          );
+
+          return;
+        }
+
+        selectedQuantity = quantity;
+        remainingQuantity = Math.max(
+          0,
+          lot.remainingQty - quantity
+        );
+
+        remainingPrincipal = Math.max(
+          0,
+          lot.remainingPrincipal - principal
+        );
+      } else {
+        principal = Math.round(value);
+
+        if (value !== principal) {
+          errors.push(
+            `${lot.id} — ငွေသားအရင်းဆပ်ငွေကို ကျပ်ပြည့်ဖြင့်သာ ထည့်ပါ`
+          );
+
+          return;
+        }
+
+        if (principal > lot.remainingPrincipal) {
+          errors.push(
+            `${lot.id} — လက်ကျန်အရင်း ${batchMoney(lot.remainingPrincipal)} ထက် မကျော်ရပါ`
+          );
+
+          return;
+        }
+
+        remainingPrincipal = Math.max(
+          0,
+          lot.remainingPrincipal - principal
+        );
+      }
+
+      const halfMonthSteps =
+        advanceInterestHalfMonthSteps(days);
+
+      const interest = simpleAdvanceInterest(
+        principal,
+        lot.monthlyRate,
+        days
+      );
+
+      const total = principal + interest;
+
+      const remainingLabel = lot.type === 'GOODS'
+        ? `${mm(remainingQuantity)} ${lot.unit} / ${batchMoney(remainingPrincipal)}`
+        : batchMoney(remainingPrincipal);
+
+      if (interestCell) {
+        interestCell.textContent = batchMoney(interest);
+      }
+
+      if (totalCell) {
+        totalCell.textContent = batchMoney(total);
+      }
+
+      if (remainingCell) {
+        remainingCell.textContent = remainingLabel;
+      }
+
+      lines.push({
+        serverId: lot.serverId,
+        advanceId: lot.id,
+        type: lot.type,
+        itemName: lot.itemName || 'ငွေသား',
+        unit: lot.unit || 'ကျပ်',
+        issuedDate: lot.issuedDate,
+        monthlyRate: lot.monthlyRate,
+        originalPrincipal: lot.originalPrincipal,
+        originalQty: lot.originalQty,
+        selectedPrincipal: principal,
+        selectedQuantity,
+        days,
+        halfMonthSteps,
+        interest,
+        total,
+        remainingPrincipal,
+        remainingQuantity
+      });
+    });
+
+    document
+      .querySelectorAll(
+        '#repayBatchLines [data-repay-batch-select]:not(:checked)'
+      )
+      .forEach(checkbox => {
+        const row = checkbox.closest('tr');
+
+        row?.querySelector('[data-repay-batch-interest]')
+          ?.replaceChildren(document.createTextNode('—'));
+
+        row?.querySelector('[data-repay-batch-total]')
+          ?.replaceChildren(document.createTextNode('—'));
+
+        row?.querySelector('[data-repay-batch-remaining]')
+          ?.replaceChildren(document.createTextNode('—'));
+      });
+
+    const totalPrincipal = lines.reduce(
+      (sum, line) => sum + line.selectedPrincipal,
+      0
+    );
+
+    const totalInterest = lines.reduce(
+      (sum, line) => sum + line.interest,
+      0
+    );
+
+    const totalReceived = totalPrincipal + totalInterest;
+
+    repayIssueOutput.textContent =
+      `${mm(lines.length)} စာရင်း`;
+
+    repayDaysOutput.textContent = lines.length
+      ? 'Lot တစ်ခုချင်းစီ၏ ထုတ်ရက် / အတိုးနှုန်းဖြင့်'
+      : '—';
+
+    repayPrincipalOutput.textContent =
+      batchMoney(totalPrincipal);
+
+    repayInterestOutput.textContent =
+      batchMoney(totalInterest);
+
+    repayTotalOutput.textContent =
+      batchMoney(totalReceived);
+
+    repayRemainingOutput.textContent = lines.length
+      ? `${mm(lines.length)} စာရင်းကို Server တွင် update လုပ်မည်`
+      : '—';
+
+    repayValidation.style.display = errors.length
+      ? 'block'
+      : 'none';
+
+    repayValidation.innerHTML = errors
+      .map(error => `• ${safeText(error)}`)
+      .join('<br>');
+
+    const valid =
+      Boolean(farmer)
+      && lines.length > 0
+      && errors.length === 0
+      && totalPrincipal > 0;
+
+    saveAdvanceRepayment.disabled =
+      !valid
+      || repaymentSaving
+      || !financeWriteReady();
+
+    return {
+      valid,
+      errors,
+      farmer,
+      paymentDate,
+      lines,
+      totalPrincipal,
+      totalInterest,
+      totalReceived
+    };
+  }
+
+  repaymentCalculation = function() {
+    return calculateBatchRepayment();
+  };
+
+  repayAdvanceFarmer.onchange = () => {
+    renderBatchRepaymentLots();
+  };
+
+  [repayDate, repayPaymentMethod, repayReference].forEach(input => {
+    input.addEventListener('input', repaymentCalculation);
+    input.addEventListener('change', repaymentCalculation);
+  });
+
+  document.addEventListener('change', event => {
+    const checkbox = event.target.closest(
+      '#repayBatchLines [data-repay-batch-select]'
+    );
+
+    if (!checkbox) {
+      return;
+    }
+
+    const row = checkbox.closest('tr');
+    const amountInput = row?.querySelector(
+      '[data-repay-batch-input]'
+    );
+
+    if (amountInput) {
+      amountInput.disabled = !checkbox.checked;
+
+      if (!checkbox.checked) {
+        amountInput.value = '';
+      }
+
+      if (checkbox.checked) {
+        amountInput.focus();
+      }
+    }
+
+    repaymentCalculation();
+  });
+
+  document.addEventListener('input', event => {
+    if (
+      event.target.matches(
+        '#repayBatchLines [data-repay-batch-input]'
+      )
+    ) {
+      repaymentCalculation();
+    }
+  });
+
+  /* -------------------------------------------------------
+     Print / Preview
+     ------------------------------------------------------- */
+  previewAdvanceRepaymentVoucher.onclick = () => {
+    const payment = repaymentCalculation();
+
+    if (!payment.valid) {
+      liveMessage(
+        payment.errors[0]
+          || 'ပြန်ဆပ်မည့် စာရင်းများကို စစ်ပါ'
+      );
+
+      return;
+    }
+
+    const rows = [
+      ['တောင်သူ', payment.farmer.farmerName],
+      ['ဆပ်သည့်ရက်', formatAdvanceDate(payment.paymentDate)],
+      ['ပါဝင်သော စိုက်ထုတ်စာရင်း', `${mm(payment.lines.length)} စာရင်း`],
+      ...payment.lines.map((line, index) => [
+        `${mm(index + 1)}. ${line.advanceId}`,
+        `${line.itemName} · အရင်း ${batchMoney(line.selectedPrincipal)} · အတိုး ${batchMoney(line.interest)} · စုစုပေါင်း ${batchMoney(line.total)}`
+      ]),
+      ['အရင်းစုစုပေါင်း', batchMoney(payment.totalPrincipal)],
+      ['အတိုးစုစုပေါင်း', batchMoney(payment.totalInterest)]
+    ];
+
+    setVoucher({
+      prefix: 'RP',
+      voucherNumber: 'နမူနာ',
+      register: false,
+      title: 'အကြွေးဆပ်ငွေ လက်ခံဘောင်ချာ',
+      farmer: payment.farmer.farmerName,
+      date: payment.paymentDate,
+      rows,
+      totalLabel: 'ယခုလက်ခံငွေ စုစုပေါင်း',
+      total: batchMoney(payment.totalReceived)
+    });
+  };
+
+  /* -------------------------------------------------------
+     Save one batch with one RP Voucher
+     ------------------------------------------------------- */
+  saveAdvanceRepayment.onclick = async () => {
+    if (repaymentSaving) {
+      return;
+    }
+
+    const payment = repaymentCalculation();
+
+    if (!financeWriteReady()) {
+      liveMessage(
+        saveAdvanceRepayment.title
+          || 'Owner Finance Server မချိတ်ရသေးပါ'
+      );
+
+      return;
+    }
+
+    if (!payment.valid) {
+      liveMessage(
+        payment.errors[0]
+          || 'ဆပ်ငွေစာရင်းကို စစ်ပါ'
+      );
+
+      return;
+    }
+
+    const confirmText =
+      `${payment.farmer.farmerName} ၏ `
+      + `${payment.lines.length} စာရင်းကို `
+      + `${batchMoney(payment.totalReceived)} ဖြင့် `
+      + 'RP ဘောင်ချာတစ်စောင်တည်းအဖြစ် သိမ်းမည်လား?';
+
+    if (!confirm(confirmText)) {
+      return;
+    }
+
+    const body = {
+      p_customer_id: payment.farmer.customerId,
+
+      p_lines: payment.lines.map(line => (
+        line.type === 'GOODS'
+          ? {
+              advance_lot_id: line.serverId,
+              quantity: line.selectedQuantity
+            }
+          : {
+              advance_lot_id: line.serverId,
+              principal_kyat: line.selectedPrincipal
+            }
+      )),
+
+      p_payment_method: repayPaymentMethod.value,
+      p_payment_reference: repayReference.value.trim() || null,
+      p_notes: null
+    };
+
+    const requestId = financeRequestId(
+      'repaymentBatch',
+      body
+    );
+
+    repaymentSaving = true;
+    financeRefreshWriteAccess();
+
+    try {
+      const saved = await financeRpc(
+        'repay_advances_batch',
+        {
+          p_request_id: requestId,
+          ...body
+        }
+      );
+
+      financeClearRequest('repaymentBatch');
+
+      const savedLines = Array.isArray(saved.repayment_lines)
+        ? saved.repayment_lines
+        : JSON.parse(saved.repayment_lines || '[]');
+
+      const paymentDate = String(saved.payment_date)
+        .slice(0, 10);
+
+      const principalTotal = financeNumber(
+        saved.total_principal_kyat
+      );
+
+      const interestTotal = financeNumber(
+        saved.total_interest_kyat
+      );
+
+      const receivedTotal = financeNumber(
+        saved.total_received_kyat
+      );
+
+      const rows = [
+        ['RP ဘောင်ချာအမှတ်', saved.repayment_ref],
+        ['တောင်သူ', payment.farmer.farmerName],
+        ['Server ဆပ်သည့်ရက်', formatAdvanceDate(paymentDate)],
+        ['ပါဝင်သော စိုက်ထုတ်စာရင်း', `${mm(savedLines.length)} စာရင်း`],
+
+        ...savedLines.map((line, index) => {
+          const linePrincipal = financeNumber(line.principal_kyat);
+          const lineInterest = financeNumber(line.interest_kyat);
+          const lineTotal = financeNumber(
+            line.total_received_kyat
+          );
+
+          const remaining = line.advance_type === 'GOODS'
+            ? `${mm(financeNumber(line.remaining_quantity))} / ${batchMoney(line.remaining_principal_kyat)}`
+            : batchMoney(line.remaining_principal_kyat);
+
+          return [
+            `${mm(index + 1)}. ${line.advance_ref}`,
+            `${line.item_name || 'ငွေသား'} · အရင်း ${batchMoney(linePrincipal)} · အတိုး ${batchMoney(lineInterest)} · စုစုပေါင်း ${batchMoney(lineTotal)} · ကျန် ${remaining}`
+          ];
+        }),
+
+        ['အရင်းစုစုပေါင်း', batchMoney(principalTotal)],
+        ['အတိုးစုစုပေါင်း', batchMoney(interestTotal)],
+        [
+          'လက်ခံနည်း',
+          methodLabels[repayPaymentMethod.value]
+            || repayPaymentMethod.value
+        ],
+        ['Reference', repayReference.value.trim() || '—']
+      ];
+
+      batchClearSelections();
+      repayReference.value = '';
+
+      await financeReloadAfterWrite();
+      renderBatchRepaymentLots();
+
+      setVoucher({
+        prefix: 'RP',
+        voucherNumber: saved.repayment_ref,
+        title: 'အကြွေးဆပ်ငွေ လက်ခံဘောင်ချာ',
+        farmer: payment.farmer.farmerName,
+        date: paymentDate,
+        rows,
+        totalLabel: 'ယခုလက်ခံငွေ စုစုပေါင်း',
+        total: batchMoney(receivedTotal)
+      });
+
+      liveMessage(
+        `✓ ${saved.repayment_ref} · `
+        + `${mm(savedLines.length)} စာရင်း · `
+        + `အရင်း ${batchMoney(principalTotal)} + `
+        + `အတိုး ${batchMoney(interestTotal)} `
+        + 'ကို Server တွင် ဘောင်ချာတစ်စောင်တည်းဖြင့် သိမ်းပြီး'
+      );
+    } catch (error) {
+      liveMessage(financeFriendlyError(error));
+    } finally {
+      repaymentSaving = false;
+      financeRefreshWriteAccess();
+    }
+  };
+
+  mountBatchRepaymentUi();
+  syncRepaymentLots();
+  repaymentCalculation();
+})();
+</script>
 </script></body></html>
