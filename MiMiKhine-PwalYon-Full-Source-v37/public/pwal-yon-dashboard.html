@@ -6338,5 +6338,446 @@ farmerStatementEl(
   syncRepaymentLots();
   repaymentCalculation();
 })();
+/* ==========================================================
+   PRODUCT CATEGORY MASTER UI
+   Category အသစ်ထည့် / အစဉ်ပြင် / Active-Inactive ပြင်ရန်
+   ========================================================== */
+(()=>{
+  let editingProductCategoryId=null;
 
+  const categoryUiEl=id=>document.getElementById(id);
+
+  function categoryMasterCanWrite(){
+    return Boolean(
+      typeof activeStaffReady==='function' &&
+      typeof masterCanCatalog==='function' &&
+      activeStaffReady() &&
+      masterCanCatalog()
+    );
+  }
+
+  function mountProductCategoryPanel(){
+    if(categoryUiEl('productCategoryMasterPanel'))return;
+
+    const productFormNode=categoryUiEl('productForm');
+
+    if(!productFormNode)return;
+
+    productFormNode.insertAdjacentHTML(
+      'afterend',
+      `
+      <div
+        class="panel"
+        id="productCategoryMasterPanel"
+        style="margin-top:18px"
+      >
+        <div class="panel-head">
+          <div>
+            <h3>Category Master</h3>
+            <small style="color:var(--muted)">
+              Category အသစ်ကို ဒီနေရာမှသာ ထည့်ပါ။ Product တွင် ရွေးရန်သာဖြစ်သည်။
+            </small>
+          </div>
+
+          <button
+            class="btn"
+            id="refreshProductCategories"
+            type="button"
+          >
+            ↻ ပြန်ဖတ်ရန်
+          </button>
+        </div>
+
+        <form id="productCategoryForm" class="product-form-grid">
+          <div class="product-code-card">
+            <small>Category ID</small>
+            <b id="productCategoryIdPreview">Server Auto</b>
+          </div>
+
+          <div class="field">
+            <label for="productCategoryName">Category အမည် *</label>
+            <input
+              id="productCategoryName"
+              required
+              maxlength="100"
+              placeholder="ဥပမာ — အာမို / ပိုးသတ်ဆေး / ပလပ်စတစ်အိတ်"
+            >
+          </div>
+
+          <div class="field">
+            <label for="productCategorySortOrder">အစဉ် (Sort Order)</label>
+            <input
+              id="productCategorySortOrder"
+              type="number"
+              required
+              min="0"
+              step="1"
+              value="100"
+            >
+          </div>
+
+          <div class="field">
+            <label for="productCategoryNote">မှတ်ချက်</label>
+            <input
+              id="productCategoryNote"
+              maxlength="500"
+              placeholder="ဥပမာ — စိုက်ပျိုးရေးသုံးပစ္စည်း"
+            >
+          </div>
+
+          <label
+            style="display:flex;align-items:center;gap:8px;font-size:13px"
+          >
+            <input
+              id="productCategoryActive"
+              type="checkbox"
+              checked
+            >
+            Active အဖြစ် အသုံးပြုမည်
+          </label>
+
+          <div
+            class="form-actions"
+            style="grid-column:1/-1"
+          >
+            <button
+              class="btn"
+              id="cancelProductCategory"
+              type="button"
+            >
+              မထည့်တော့ပါ
+            </button>
+
+            <button
+              class="btn primary"
+              id="saveProductCategory"
+              type="submit"
+            >
+              ✓ Category သိမ်းရန်
+            </button>
+          </div>
+        </form>
+
+        <div
+          class="product-catalog-table"
+          style="margin-top:18px"
+        >
+          <div class="panel-head">
+            <h3>
+              လက်ရှိ Category စာရင်း
+              <span
+                id="productCategoryCount"
+                style="color:var(--muted);font-weight:500"
+              >(၀)</span>
+            </h3>
+
+            <small style="color:var(--muted)">
+              Inactive Category သည် Product အသစ်ထည့်ရာတွင် မပေါ်တော့ပါ
+            </small>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>အစဉ်</th>
+                <th>မှတ်ချက်</th>
+                <th>အခြေအနေ</th>
+                <th>လုပ်ဆောင်ချက်</th>
+              </tr>
+            </thead>
+
+            <tbody id="productCategoryBody">
+              <tr>
+                <td colspan="5" class="master-empty">
+                  Category စာရင်းဖတ်နေသည်…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      `
+    );
+  }
+
+  function resetProductCategoryUi(){
+    editingProductCategoryId=null;
+
+    const form=categoryUiEl('productCategoryForm');
+
+    if(!form)return;
+
+    form.reset();
+
+    categoryUiEl('productCategorySortOrder').value='100';
+    categoryUiEl('productCategoryActive').checked=true;
+
+    categoryUiEl('productCategoryName').readOnly=false;
+
+    categoryUiEl('productCategoryIdPreview').textContent=
+      'Server Auto';
+
+    categoryUiEl('saveProductCategory').textContent=
+      '✓ Category သိမ်းရန်';
+  }
+
+  function applyProductCategoryPermissions(){
+    const canWrite=categoryMasterCanWrite();
+
+    const saveButton=categoryUiEl('saveProductCategory');
+    const refreshButton=categoryUiEl('refreshProductCategories');
+
+    if(saveButton)saveButton.disabled=!canWrite;
+    if(refreshButton){
+      refreshButton.disabled=!(
+        typeof activeStaffReady==='function' &&
+        activeStaffReady()
+      );
+    }
+  }
+
+  function renderProductCategoryUi(){
+    const body=categoryUiEl('productCategoryBody');
+
+    if(!body || !window.masterState)return;
+
+    const rows=[...(masterState.categories||[])].sort((a,b)=>{
+      const sortDifference=
+        Number(a.sort_order||0)-Number(b.sort_order||0);
+
+      if(sortDifference!==0)return sortDifference;
+
+      return String(a.name||'').localeCompare(
+        String(b.name||''),
+        'my'
+      );
+    });
+
+    const count=categoryUiEl('productCategoryCount');
+
+    if(count)count.textContent='('+mm(rows.length)+')';
+
+    body.innerHTML=rows.length
+      ? rows.map(row=>`
+        <tr>
+          <td><b>${safeText(row.name||'')}</b></td>
+          <td>${mm(Number(row.sort_order||0))}</td>
+          <td>${safeText(row.notes||'—')}</td>
+          <td>
+            <span class="pill ${row.active?'':'red'}">
+              ${row.active?'Active':'Inactive'}
+            </span>
+          </td>
+          <td>
+            <button
+              class="btn"
+              type="button"
+              data-edit-product-category="${safeText(row.category_id)}"
+              ${categoryMasterCanWrite()?'':'disabled'}
+            >
+              ပြင်ရန်
+            </button>
+          </td>
+        </tr>
+      `).join('')
+      : `
+        <tr>
+          <td colspan="5" class="master-empty">
+            Category မရှိသေးပါ
+          </td>
+        </tr>
+      `;
+
+    applyProductCategoryPermissions();
+  }
+
+  function editProductCategoryUi(categoryId){
+    const row=(masterState.categories||[]).find(
+      item=>item.category_id===categoryId
+    );
+
+    if(!row)return;
+
+    editingProductCategoryId=categoryId;
+
+    /*
+      လက်ရှိ Product records မရောထွေးစေရန်
+      ရှိပြီးသား Category ကို Rename မလုပ်ပါ။
+      နာမည်အသစ်လိုလျှင် အသစ်ထည့်ပြီး Product တွင်ပြန်ရွေးပါ။
+    */
+    categoryUiEl('productCategoryName').value=row.name||'';
+    categoryUiEl('productCategoryName').readOnly=true;
+
+    categoryUiEl('productCategorySortOrder').value=
+      String(Number(row.sort_order||100));
+
+    categoryUiEl('productCategoryNote').value=row.notes||'';
+
+    categoryUiEl('productCategoryActive').checked=
+      row.active===true;
+
+    categoryUiEl('productCategoryIdPreview').textContent=
+      String(row.category_id||'');
+
+    categoryUiEl('saveProductCategory').textContent=
+      '✓ Category ပြင်ဆင်မှု သိမ်းရန်';
+
+    categoryUiEl('productCategoryMasterPanel').scrollIntoView({
+      behavior:'smooth',
+      block:'start'
+    });
+  }
+
+  async function saveProductCategoryUi(event){
+    event.preventDefault();
+
+    const form=event.currentTarget;
+
+    if(!form.reportValidity())return;
+
+    if(!categoryMasterCanWrite()){
+      toast.textContent='Category ပြင်ရန် Owner / Admin Login လိုသည်';
+      showToast();
+      return;
+    }
+
+    const saveButton=categoryUiEl('saveProductCategory');
+
+    const oldButtonText=saveButton.textContent;
+
+    saveButton.disabled=true;
+    saveButton.textContent='သိမ်းနေသည်…';
+
+    let saved=false;
+
+    try{
+      const sortOrder=Number(
+        categoryUiEl('productCategorySortOrder').value
+      );
+
+      if(
+        !Number.isInteger(sortOrder) ||
+        sortOrder<0 ||
+        sortOrder>999999
+      ){
+        throw new Error(
+          'Category အစဉ်ကို ၀ မှ ၉၉၉,၉၉၉ အတွင်း ကိန်းပြည့်ဖြင့် ထည့်ပါ'
+        );
+      }
+
+      const isEditing=Boolean(editingProductCategoryId);
+
+      const payload={
+        sort_order:sortOrder,
+        active:categoryUiEl('productCategoryActive').checked,
+        notes:categoryUiEl('productCategoryNote').value.trim()||null
+      };
+
+      if(!isEditing){
+        const name=categoryUiEl('productCategoryName').value.trim();
+
+        if(!name){
+          throw new Error('Category အမည် ထည့်ပါ');
+        }
+
+        payload.name=name;
+      }
+
+      const query=isEditing
+        ? supabaseClient
+            .from('product_categories')
+            .update(payload)
+            .eq('category_id',editingProductCategoryId)
+        : supabaseClient
+            .from('product_categories')
+            .insert(payload);
+
+      const {error}=await query
+        .select('category_id')
+        .single();
+
+      if(error)throw error;
+
+      saved=true;
+
+      resetProductCategoryUi();
+
+      await loadMasterData({quiet:true});
+
+      toast.textContent=isEditing
+        ? '✓ Category ပြင်ဆင်မှုကို သိမ်းပြီး'
+        : '✓ Category အသစ်ကို သိမ်းပြီး';
+
+      showToast();
+    }catch(error){
+      toast.textContent=
+        typeof masterFriendlyError==='function'
+          ? masterFriendlyError(error)
+          : String(error?.message||error);
+
+      showToast();
+    }finally{
+      if(!saved){
+        saveButton.textContent=oldButtonText;
+      }
+
+      applyProductCategoryPermissions();
+    }
+  }
+
+  function initializeProductCategoryUi(){
+    mountProductCategoryPanel();
+
+    const form=categoryUiEl('productCategoryForm');
+
+    if(!form)return;
+
+    form.addEventListener(
+      'submit',
+      saveProductCategoryUi
+    );
+
+    categoryUiEl('cancelProductCategory').addEventListener(
+      'click',
+      resetProductCategoryUi
+    );
+
+    categoryUiEl('refreshProductCategories').addEventListener(
+      'click',
+      ()=>loadMasterData().catch(()=>{})
+    );
+
+    categoryUiEl('productCategoryBody').addEventListener(
+      'click',
+      event=>{
+        const button=event.target.closest(
+          '[data-edit-product-category]'
+        );
+
+        if(!button)return;
+
+        editProductCategoryUi(
+          button.dataset.editProductCategory
+        );
+      }
+    );
+
+    /*
+      လက်ရှိ Master Data render function ကို မဖျက်ဘဲ
+      Category UI ကိုပါ render လုပ်စေခြင်း
+    */
+    const originalRenderMasterData=renderMasterData;
+
+    renderMasterData=function(){
+      originalRenderMasterData();
+      renderProductCategoryUi();
+    };
+
+    resetProductCategoryUi();
+    renderProductCategoryUi();
+  }
+
+  initializeProductCategoryUi();
+})();
 </script></body></html>
