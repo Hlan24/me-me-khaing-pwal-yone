@@ -855,22 +855,18 @@ active          BOOLEAN</code></div></div>
         <div class="panel-head" style="margin-top:24px"><h3>နောက်ဆုံး ပြန်ဆပ်ထားမှု</h3><small style="color:var(--muted)">အရင်းနှင့် အတိုးကို သီးခြားပြထားသည်</small></div>
         <div class="advance-table-wrap"><table><thead><tr><th>RP / Offset Ref</th><th>ရက်</th><th>တောင်သူ</th><th>ရှင်းသည့်အရာ</th><th>အရင်း</th><th>အတိုး</th><th>လက်ခံ/ဖြတ်ငွေ</th><th>လက်ကျန်</th></tr></thead><tbody id="advanceRepaymentBody"><tr><td colspan="8" style="text-align:center;color:var(--muted)">ပြန်ဆပ်ထားမှု မရှိသေးပါ</td></tr></tbody></table></div>
       </div>
-      <div class="panel product-catalog-panel hidden" id="productCatalogPanel"><div class="panel-head"><div><h3>ကုန်ပစ္စည်းအမျိုးအစား အသစ်ထည့်ရန်</h3><span style="font-size:11px;color:var(--muted)">Product Catalog နှင့် Farm Input Inventory</span></div><button class="btn" id="closeProductCatalog" type="button">✕ ပိတ်ရန်</button></div><form id="productForm" class="product-form-grid"><div class="product-code-card"><small>Product Code</small><b id="productCodePreview">P-006</b></div><div class="field"><label for="productName">ကုန်ပစ္စည်းအမည် *</label><input id="productName" required placeholder="ဥပမာ — ယူရီးယားမြေဆီ"></div><div class="field"><label for="productCategory">Category</label><input
-  id="productCategory"
-  list="productCategoryOptions"
-  required
-  maxlength="100"
-  placeholder="ရှိပြီးသား Category ရွေးပါ သို့မဟုတ် အသစ်ရိုက်ထည့်ပါ"
->
+      <div class="panel product-catalog-panel hidden" id="productCatalogPanel"><div class="panel-head"><div><h3>ကုန်ပစ္စည်းအမျိုးအစား အသစ်ထည့်ရန်</h3><span style="font-size:11px;color:var(--muted)">Product Catalog နှင့် Farm Input Inventory</span></div><button class="btn" id="closeProductCatalog" type="button">✕ ပိတ်ရန်</button></div><form id="productForm" class="product-form-grid"><div class="product-code-card"><small>Product Code</small><b id="productCodePreview">P-006</b></div><div class="field"><label for="productName">ကုန်ပစ္စည်းအမည် *</label><input id="productName" required placeholder="ဥပမာ — ယူရီးယားမြေဆီ"></div><div class="field"><label for="productCategory">Category</label>
+<div class="field">
+  <label for="productCategory">Category *</label>
 
-<datalist id="productCategoryOptions">
-  <option value="ဆန် / စားသောက်ကုန်">
-  <option value="မြေဆီ">
-  <option value="မျိုးစေ့">
-  <option value="စိုက်ပျိုးဆေး">
-  <option value="ကိရိယာ">
-  <option value="အခြား">
-</datalist></div><div class="field"><label for="productUnit">ပုံသေယူနစ် *</label><select id="productUnit"><option>အိတ်</option><option>ဗူး</option><option>ပုလင်း</option><option>ထုပ်</option><option>ကီလို</option><option>ခု</option></select></div><div class="field"><label for="productDefaultPrice">တစ်ယူနစ် ပုံသေတန်ဖိုး (ကျပ်) *</label><input id="productDefaultPrice" required type="number" min="0" step="100" placeholder="0"></div><div class="field"><label for="productOpeningStock">လက်ရှိစတော့ အရေအတွက်</label><input id="productOpeningStock" type="number" min="0" step="0.01" value="0"></div><div class="field"><label for="productReorderLevel">အနည်းဆုံးစတော့ သတိပေးပမာဏ</label><input id="productReorderLevel" type="number" min="0" step="0.01" value="5"></div><div class="field"><label for="productNote">မှတ်ချက်</label><input id="productNote" placeholder="Brand၊ အမျိုးအစား စသည်"></div><div class="form-actions"><button class="btn" id="cancelProduct" type="button">မထည့်တော့ပါ</button><button class="btn primary" type="submit">✓ Catalog ထဲ သိမ်းပြီး ရွေးရန်</button></div></form><div class="product-catalog-table"><div class="panel-head"><h3>လက်ရှိ Product Catalog <span id="productCatalogCount" style="color:var(--muted);font-weight:500">(၅)</span></h3><small style="color:var(--muted)">စတော့နည်းပါက အနီရောင်ပြမည်</small></div><table><thead><tr><th>Code</th><th>ကုန်ပစ္စည်း</th><th>Category</th><th>ယူနစ်</th><th>ပုံသေတန်ဖိုး</th><th>လက်ရှိစတော့</th></tr></thead><tbody id="productCatalogBody"><tr class="product-row"><td>P-001</td><td>ဆန်</td><td>စားသောက်ကုန်</td><td>အိတ်</td><td>ကျပ် ၈၅,၀၀၀</td><td class="stock-ok">၁၂၀ အိတ်</td></tr><tr class="product-row"><td>P-002</td><td>မြေဆီ</td><td>မြေဆီ</td><td>အိတ်</td><td>ကျပ် ၇၂,၀၀၀</td><td class="stock-ok">၈၆ အိတ်</td></tr><tr class="product-row"><td>P-003</td><td>မျိုးစေ့</td><td>မျိုးစေ့</td><td>အိတ်</td><td>ကျပ် ၉၅,၀၀၀</td><td class="stock-low">၄ အိတ်</td></tr><tr class="product-row"><td>P-004</td><td>ပြောင်းမျိုး</td><td>မျိုးစေ့</td><td>အိတ်</td><td>ကျပ် ၁၁၀,၀၀၀</td><td class="stock-ok">၂၄ အိတ်</td></tr><tr class="product-row"><td>P-005</td><td>စိုက်ပျိုးဆေး</td><td>စိုက်ပျိုးဆေး</td><td>ပုလင်း</td><td>ကျပ် ၁၈,၅၀၀</td><td class="stock-ok">၆၄ ပုလင်း</td></tr></tbody></table></div></div>
+  <select id="productCategory" required disabled>
+    <option value="">Category စာရင်းဖတ်နေသည်…</option>
+  </select>
+
+  <small style="color:var(--muted)">
+    Category Master မှ ရွေးပါ
+  </small>
+</div><div class="field"><label for="productUnit">ပုံသေယူနစ် *</label><select id="productUnit"><option>အိတ်</option><option>ဗူး</option><option>ပုလင်း</option><option>ထုပ်</option><option>ကီလို</option><option>ခု</option></select></div><div class="field"><label for="productDefaultPrice">တစ်ယူနစ် ပုံသေတန်ဖိုး (ကျပ်) *</label><input id="productDefaultPrice" required type="number" min="0" step="100" placeholder="0"></div><div class="field"><label for="productOpeningStock">လက်ရှိစတော့ အရေအတွက်</label><input id="productOpeningStock" type="number" min="0" step="0.01" value="0"></div><div class="field"><label for="productReorderLevel">အနည်းဆုံးစတော့ သတိပေးပမာဏ</label><input id="productReorderLevel" type="number" min="0" step="0.01" value="5"></div><div class="field"><label for="productNote">မှတ်ချက်</label><input id="productNote" placeholder="Brand၊ အမျိုးအစား စသည်"></div><div class="form-actions"><button class="btn" id="cancelProduct" type="button">မထည့်တော့ပါ</button><button class="btn primary" type="submit">✓ Catalog ထဲ သိမ်းပြီး ရွေးရန်</button></div></form><div class="product-catalog-table"><div class="panel-head"><h3>လက်ရှိ Product Catalog <span id="productCatalogCount" style="color:var(--muted);font-weight:500">(၅)</span></h3><small style="color:var(--muted)">စတော့နည်းပါက အနီရောင်ပြမည်</small></div><table><thead><tr><th>Code</th><th>ကုန်ပစ္စည်း</th><th>Category</th><th>ယူနစ်</th><th>ပုံသေတန်ဖိုး</th><th>လက်ရှိစတော့</th></tr></thead><tbody id="productCatalogBody"><tr class="product-row"><td>P-001</td><td>ဆန်</td><td>စားသောက်ကုန်</td><td>အိတ်</td><td>ကျပ် ၈၅,၀၀၀</td><td class="stock-ok">၁၂၀ အိတ်</td></tr><tr class="product-row"><td>P-002</td><td>မြေဆီ</td><td>မြေဆီ</td><td>အိတ်</td><td>ကျပ် ၇၂,၀၀၀</td><td class="stock-ok">၈၆ အိတ်</td></tr><tr class="product-row"><td>P-003</td><td>မျိုးစေ့</td><td>မျိုးစေ့</td><td>အိတ်</td><td>ကျပ် ၉၅,၀၀၀</td><td class="stock-low">၄ အိတ်</td></tr><tr class="product-row"><td>P-004</td><td>ပြောင်းမျိုး</td><td>မျိုးစေ့</td><td>အိတ်</td><td>ကျပ် ၁၁၀,၀၀၀</td><td class="stock-ok">၂၄ အိတ်</td></tr><tr class="product-row"><td>P-005</td><td>စိုက်ပျိုးဆေး</td><td>စိုက်ပျိုးဆေး</td><td>ပုလင်း</td><td>ကျပ် ၁၈,၅၀၀</td><td class="stock-ok">၆၄ ပုလင်း</td></tr></tbody></table></div></div>
     </section>
     <section class="view" id="market-prices">
       <div class="panel" id="marketEntryPanel">
@@ -2643,13 +2639,26 @@ const MASTER_TABLE_COLUMNS={
   farmers:'customer_id,full_name,phone_normalized,phone_display,nrc,gender,village,township,address,acres,land_type,primary_crop_type_id,risk_level,opening_debt_kyat,kyc_status,active,notes,created_at,updated_at',
   crops:'crop_type_id,name,category,settlement_method,default_tare_centi_pyitha,pricing_divisor_pyitha,active,notes,created_at,updated_at',
   products:'product_id,name,category,unit_name,whole_units_only,default_unit_price_kyat,reorder_level,active,notes,created_at,updated_at',
+  categories:'category_id,name,active,sort_order,notes,created_at,updated_at',
   locations:'location_id,name,location_type,active,notes,created_at,updated_at',
   staff:'user_id,email,display_name,role,active,created_at,updated_at',
   imports:'id,import_ref,request_id,business_date,import_type,source_name,notes,row_count,total_quantity,total_weight_centi_pyitha,total_principal_kyat,created_by,created_at',
   entries:'id,import_id,line_no,entry_type,customer_id,crop_type_id,product_id,location_id,quantity,weight_centi_pyitha,principal_kyat,monthly_interest_rate,opening_date,notes,created_at'
 };
-const masterState={farmers:[],crops:[],products:[],locations:[],staff:[],imports:[],entries:[],loaded:false,source:'EMPTY',updatedAt:null};
-const masterEdit={farmer:null,crop:null,product:null,location:null};
+const masterState={
+  farmers:[],
+  crops:[],
+  categories:[],
+  products:[],
+  locations:[],
+  staff:[],
+  imports:[],
+  entries:[],
+  loaded:false,
+  source:'EMPTY',
+  updatedAt:null
+};
+  const masterEdit={farmer:null,crop:null,product:null,location:null};
 let masterRealtimeChannel=null,masterRefreshTimer=null,masterLoading=false,openingPreviewState=null;
 let historicalAdvanceManualSaving=false,
     historicalAdvanceManualAttempted=false,
@@ -2668,29 +2677,87 @@ function masterAssertOnline(roles){requireActiveStaff();if(!roles.includes(supab
 function masterMessage(message,tone=''){let box=masterEl('openingImportResult');if(!box)return;box.textContent=message;box.className='opening-result show '+tone}
 function masterSetStatus(text,state=''){let badge=masterEl('masterDataSyncBadge'),label=masterEl('masterDataStatusText');if(label)label.textContent=text;if(badge){badge.className='master-sync '+(state==='LIVE'?'live':state==='ERROR'?'error':'');badge.textContent=state==='LIVE'?'ONLINE + PC COPY':state==='OFFLINE'?'OFFLINE COPY':state==='LOADING'?'ဖတ်နေသည်…':state==='ERROR'?'ERROR':'LOGIN လိုသည်'}}
 function masterFriendlyError(error){let code=String(error?.code||''),message=String(error?.message||error||'');if(code==='PGRST205'||/opening_balance|column .*nrc|column .*kyc_status/i.test(message))return'Stage 2 Master Data Migration ကို Supabase SQL Editor တွင် Run ရန်လိုသည်';if(/commit_historical_advance_import/i.test(message))return'အရင်စိုက်ထုတ်စာရင်း Migration ကို Supabase SQL Editor တွင် Run ရန်လိုသည်';if(code==='PGRST202'||/commit_opening_balance_import/i.test(message))return'Opening Balance RPC မတင်ရသေးပါ · Stage 2 Migration ကို Run ပါ';if(code==='23505')return'အမည်၊ ဖုန်း သို့မဟုတ် Code တူသော Master record ရှိပြီးသားဖြစ်သည်';if(code==='23503')return'ရွေးထားသော တောင်သူ / ကုန်ပစ္စည်း / Stock Location မရှိပါ';if(code==='42501'||code==='MASTER_ROLE_FORBIDDEN')return'ဤစာရင်းကို ပြင်ရန် သင့် Role တွင် ခွင့်ပြုချက်မရှိပါ';if(code==='23514')return'နောက်ဆုံး Active Owner ကို ပိတ်ခြင်း သို့မဟုတ် Role လျှော့ခြင်း မလုပ်နိုင်ပါ';return supabaseFriendlyError(error)}
-function cacheMasterData(){try{localStorage.setItem(MASTER_CACHE_KEY,JSON.stringify({version:1,updatedAt:new Date().toISOString(),farmers:masterState.farmers,crops:masterState.crops,products:masterState.products,locations:masterState.locations,imports:masterState.imports,entries:masterState.entries}))}catch(error){console.warn('Master cache write failed',error)}}
-function restoreMasterCache(){try{let saved=JSON.parse(localStorage.getItem(MASTER_CACHE_KEY)||'null');if(saved?.version!==1||!Array.isArray(saved.farmers)||!Array.isArray(saved.crops)||!Array.isArray(saved.products)||!Array.isArray(saved.locations))return false;Object.assign(masterState,{farmers:saved.farmers,crops:saved.crops,products:saved.products,locations:saved.locations,imports:Array.isArray(saved.imports)?saved.imports:[],entries:Array.isArray(saved.entries)?saved.entries:[],staff:[],loaded:true,source:'CACHE',updatedAt:saved.updatedAt||null});renderMasterData();masterSetStatus('ဤစက်တွင် '+(saved.updatedAt?new Date(saved.updatedAt).toLocaleString('my-MM'):'သိမ်းထားသော')+' Offline Copy ကို ဖတ်နေသည်','OFFLINE');return true}catch(error){return false}}
+function syncProductCategoryOptions(preserveValue=productCategory.value){
+  if(!productCategory)return;
+
+  let selected=String(preserveValue||'').trim();
+
+  let rows=[...masterState.categories]
+    .filter(row=>row.active===true || String(row.name||'').trim()===selected)
+    .sort((a,b)=>{
+      let orderDifference=Number(a.sort_order||0)-Number(b.sort_order||0);
+      if(orderDifference!==0)return orderDifference;
+      return String(a.name||'').localeCompare(String(b.name||''),'my');
+    });
+
+  let knownNames=new Set();
+
+  rows=rows.filter(row=>{
+    let name=String(row.name||'').trim();
+    let key=name.toLowerCase();
+
+    if(!name || knownNames.has(key))return false;
+
+    knownNames.add(key);
+    return true;
+  });
+
+  /*
+    ယခင် Product တွင် Category ရှိနေသော်လည်း
+    Category Master မှ Inactive လုပ်ထားလျှင်
+    Product ကိုပြင်ဆင်နိုင်ရန် ရွေးထားသော value ကိုသာ ပြပေးမည်။
+  */
+  if(selected && !knownNames.has(selected.toLowerCase())){
+    rows.unshift({
+      name:selected,
+      active:false,
+      legacy:true
+    });
+  }
+
+  productCategory.innerHTML=
+    '<option value="">Category ရွေးပါ</option>'+
+    rows.map(row=>{
+      let name=String(row.name||'').trim();
+      let label=row.legacy
+        ? name+' (ယခင် Category / Inactive)'
+        : name;
+
+      return `<option value="${safeText(name)}">${safeText(label)}</option>`;
+    }).join('');
+
+  productCategory.value=
+    rows.some(row=>String(row.name||'').trim()===selected)
+      ? selected
+      : '';
+
+  productCategory.disabled=
+    !activeStaffReady() || rows.length===0;
+}
+  function cacheMasterData(){try{localStorage.setItem(MASTER_CACHE_KEY,JSON.stringify({version:1,updatedAt:new Date().toISOString(),farmers:masterState.farmers,crops:masterState.crops,products:masterState.products,categories:masterState.categories,locations:masterState.locations,imports:masterState.imports,entries:masterState.entries}))}catch(error){console.warn('Master cache write failed',error)}}
+function restoreMasterCache(){try{let saved=JSON.parse(localStorage.getItem(MASTER_CACHE_KEY)||'null');if(saved?.version!==1||!Array.isArray(saved.farmers)||!Array.isArray(saved.crops)||!Array.isArray(saved.products)||!Array.isArray(saved.locations))return false;Object.assign(masterState,{farmers:saved.farmers,crops:saved.crops,products:saved.products,categories:Array.isArray(saved.categories)?saved.categories:[],locations:saved.locations,imports:Array.isArray(saved.imports)?saved.imports:[],entries:Array.isArray(saved.entries)?saved.entries:[],staff:[],loaded:true,source:'CACHE',updatedAt:saved.updatedAt||null});renderMasterData();masterSetStatus('ဤစက်တွင် '+(saved.updatedAt?new Date(saved.updatedAt).toLocaleString('my-MM'):'သိမ်းထားသော')+' Offline Copy ကို ဖတ်နေသည်','OFFLINE');return true}catch(error){return false}}
 function masterQueryError(result){if(result.error)throw result.error;return result.data||[]}
 async function masterFetchAll(table,columns,orderColumn,pageSize=500){let rows=[],cursor=null;for(;;){let query=supabaseClient.from(table).select(columns).order(orderColumn,{ascending:true}).limit(pageSize);if(cursor!==null)query=query.gt(orderColumn,cursor);let page=masterQueryError(await query);rows.push(...page);if(page.length<pageSize)return rows;let nextCursor=page[page.length-1]?.[orderColumn];if(nextCursor===null||nextCursor===undefined||nextCursor===cursor)throw new Error(table+' Master Data pagination မဆက်နိုင်ပါ');cursor=nextCursor;if(rows.length>200000)throw new Error(table+' Master Data ၂၀၀,၀၀၀ ကြောင်းကျော်နေ၍ Server Report ဖြင့် စစ်ဆေးပါ')}}
 async function loadMasterData({quiet=false}={}){
   requireActiveStaff();if(masterLoading)return;masterLoading=true;if(!quiet)masterSetStatus('Supabase မှ Master Data ဖတ်နေသည်','LOADING');
   try{
-    let [farmers,crops,products,locations,staff,imports,entries]=await Promise.all([
+    let [farmers,crops,products,categories,locations,staff,imports,entries]=await Promise.all([
       masterFetchAll('farmers',MASTER_TABLE_COLUMNS.farmers,'customer_id'),
       masterFetchAll('crop_types',MASTER_TABLE_COLUMNS.crops,'crop_type_id'),
       masterFetchAll('products',MASTER_TABLE_COLUMNS.products,'product_id'),
+      masterFetchAll('product_categories',MASTER_TABLE_COLUMNS.categories,'category_id'),
       masterFetchAll('stock_locations',MASTER_TABLE_COLUMNS.locations,'location_id'),
       supabaseClient.from('staff_members').select(MASTER_TABLE_COLUMNS.staff).order('created_at',{ascending:true}).limit(500).then(masterQueryError),
       supabaseClient.from('opening_balance_imports').select(MASTER_TABLE_COLUMNS.imports).order('created_at',{ascending:false}).limit(100).then(masterQueryError),
       masterFetchAll('opening_balance_entries',MASTER_TABLE_COLUMNS.entries,'id')
     ]);
-    Object.assign(masterState,{farmers,crops,products,locations,staff,imports,entries,loaded:true,source:'SERVER',updatedAt:new Date().toISOString()});
+    Object.assign(masterState,{farmers,crops,products,categories,locations,staff,imports,entries,loaded:true,source:'SERVER',updatedAt:new Date().toISOString()});
     cacheMasterData();renderMasterData();masterSetStatus('Supabase Master Data '+mm(masterState.farmers.length+masterState.crops.length+masterState.products.length+masterState.locations.length)+' record · ဤ PC တွင် Offline Copy သိမ်းပြီး','LIVE');startMasterDataRealtime();
   }catch(error){if(!masterState.loaded)restoreMasterCache();masterSetStatus(masterFriendlyError(error),'ERROR');if(!quiet){toast.textContent=masterFriendlyError(error);showToast()}throw error}finally{masterLoading=false}
 }
 function scheduleMasterReload(){clearTimeout(masterRefreshTimer);masterRefreshTimer=setTimeout(()=>{if(activeStaffReady())loadMasterData({quiet:true}).catch(()=>{})},300)}
 async function stopMasterDataRealtime(){if(!masterRealtimeChannel||!supabaseClient)return;let channel=masterRealtimeChannel;masterRealtimeChannel=null;try{await supabaseClient.removeChannel(channel)}catch(error){}}
-function startMasterDataRealtime(){if(!activeStaffReady()||masterRealtimeChannel)return;let channel=supabaseClient.channel('master-data-'+supabaseSessionUser.id.slice(0,8)+'-'+Date.now());['farmers','crop_types','products','stock_locations','staff_members','opening_balance_imports'].forEach(table=>channel.on('postgres_changes',{event:'*',schema:'public',table},scheduleMasterReload));channel.subscribe(status=>{if(channel!==masterRealtimeChannel)return;if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){masterSetStatus('Master Data Realtime ပြတ်နေသည် · နောက်ဆုံး PC Copy ကို ပြထားသည်','OFFLINE')}});masterRealtimeChannel=channel}
+function startMasterDataRealtime(){if(!activeStaffReady()||masterRealtimeChannel)return;let channel=supabaseClient.channel('master-data-'+supabaseSessionUser.id.slice(0,8)+'-'+Date.now());['farmers','crop_types','products','product_categories','stock_locations','staff_members','opening_balance_imports'].forEach(table=>channel.on('postgres_changes',{event:'*',schema:'public',table},scheduleMasterReload));channel.subscribe(status=>{if(channel!==masterRealtimeChannel)return;if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){masterSetStatus('Master Data Realtime ပြတ်နေသည် · နောက်ဆုံး PC Copy ကို ပြထားသည်','OFFLINE')}});masterRealtimeChannel=channel}
 function openingProductTotals(){let totals=new Map();masterState.entries.filter(row=>row.entry_type==='PRODUCT_STOCK').forEach(row=>totals.set(row.product_id,(totals.get(row.product_id)||0)+Number(row.quantity||0)));return totals}
 function openingCropTotals(){let totals=new Map();masterState.entries.filter(row=>row.entry_type==='CROP_STOCK').forEach(row=>totals.set(row.crop_type_id,(totals.get(row.crop_type_id)||0)+Number(row.weight_centi_pyitha||0)));return totals}
 function cropById(id){return masterState.crops.find(row=>row.crop_type_id===id)}
@@ -2731,7 +2798,7 @@ function syncMasterOptions(){
   Object.keys(warehouseStock).forEach(key=>delete warehouseStock[key]);let cropTotals=openingCropTotals();masterState.crops.forEach((row,index)=>{let total=cropTotals.get(row.crop_type_id)||0;if(row.active||total>0)warehouseStock[row.crop_type_id]={name:row.name,centi:total,color:['#a11d2f','#d65b4c','#6f1422','#9b4b59'][index%4]}});renderWarehouseStock();syncSaleCropOptions();syncInputSaleProducts(true);if(marketPriceInitialized){renderMarketPriceEntrySheet();syncMarketFilterOptions()}updateCropWorkflow();renderBags()
 }
 function updateMasterPermissions(){let farmerWrite=masterCanFarmers(),catalogWrite=masterCanCatalog(),staffWrite=masterCanStaff(),importWrite=masterCanImport();farmerForm.querySelector('button[type="submit"]').disabled=!farmerWrite;productForm.querySelector('button[type="submit"]').disabled=!catalogWrite;cropForm.querySelector('button[type="submit"]').disabled=!catalogWrite;masterEl('saveStockLocation').disabled=!catalogWrite;masterEl('openingImportRoleBadge').className='pill '+(importWrite?'':'red');masterEl('commitOpeningImport').disabled=!importWrite||!openingPreviewState?.valid;masterEl('refreshStaffMaster').disabled=!activeStaffReady();masterEl('refreshStockLocations').disabled=!activeStaffReady();renderHistoricalAdvanceManual()}
-function renderMasterData(){renderFarmerMaster();renderCropMaster();renderProductMaster();renderLocationMaster();renderStaffMaster();renderOpeningHistory();syncMasterOptions();syncHistoricalAdvanceManualOptions();updateMasterPermissions()}
+function renderMasterData(){renderFarmerMaster();renderCropMaster();renderProductMaster();renderLocationMaster();syncProductCategoryOptions();renderStaffMaster();renderOpeningHistory();syncMasterOptions();syncHistoricalAdvanceManualOptions();updateMasterPermissions()}
 function masterInsertCheckbox(form,id,label){if(masterEl(id))return;let actions=form.querySelector('.form-actions'),wrapper=document.createElement('label');wrapper.className='master-active-toggle';wrapper.innerHTML=`<input id="${id}" type="checkbox" checked> ${label}`;form.insertBefore(wrapper,actions)}
 function prepareMasterForms(){
   masterInsertCheckbox(farmerForm,'farmerActive','Active အဖြစ် အသုံးပြုမည်');masterInsertCheckbox(cropForm,'cropActive','Active အဖြစ် အသုံးပြုမည်');masterInsertCheckbox(productForm,'productWholeUnits','အရေအတွက်ကို ကိန်းပြည့်သာ လက်ခံမည်');masterInsertCheckbox(productForm,'productActive','Active အဖြစ် အသုံးပြုမည်');
@@ -2753,7 +2820,8 @@ cropForm.onsubmit=event=>{event.preventDefault();if(!cropForm.reportValidity())r
 cropCatalogBody.onclick=event=>{let button=event.target.closest('[data-edit-crop]');if(button)editCropMaster(button.dataset.editCrop)};cancelCrop.onclick=resetCropMasterForm;closeCropCatalog.onclick=()=>showView('weighing','live');openCropCatalog=()=>{showView('farmers','crops');cropForm.scrollIntoView({behavior:'smooth',block:'start'})};addCropType.onclick=openCropCatalog;cropCategory.onchange=applyCropCategoryDefaults;
 
 function resetProductMasterForm(){masterEdit.product=null;productForm.reset();productOpeningStock.value='0';productReorderLevel.value='5';masterEl('productWholeUnits').checked=true;masterEl('productActive').checked=true;productCodePreview.textContent='Server Auto';productForm.querySelector('button[type="submit"]').textContent='✓ ကုန်ပစ္စည်း Master သိမ်းရန်'}
-function editProductMaster(id){let row=masterState.products.find(item=>item.product_id===id);if(!row)return;masterEdit.product=id;productCodePreview.textContent=id;productName.value=row.name||'';productCategory.value=row.category||'အခြား';productUnit.value=row.unit_name||'ခု';productDefaultPrice.value=String(Number(row.default_unit_price_kyat||0));productOpeningStock.value='0';productReorderLevel.value=String(Number(row.reorder_level||0));productNote.value=row.notes||'';masterEl('productWholeUnits').checked=row.whole_units_only===true;masterEl('productActive').checked=row.active===true;productForm.querySelector('button[type="submit"]').textContent='✓ ပြင်ဆင်မှု သိမ်းရန်';productForm.scrollIntoView({behavior:'smooth',block:'start'});productName.focus()}
+function editProductMaster(id){let row=masterState.products.find(item=>item.product_id===id);if(!row)return;masterEdit.product=id;productCodePreview.textContent=id;productName.value=row.name||'';syncProductCategoryOptions(row.category||'');
+productCategory.value=row.category||'';productUnit.value=row.unit_name||'ခု';productDefaultPrice.value=String(Number(row.default_unit_price_kyat||0));productOpeningStock.value='0';productReorderLevel.value=String(Number(row.reorder_level||0));productNote.value=row.notes||'';masterEl('productWholeUnits').checked=row.whole_units_only===true;masterEl('productActive').checked=row.active===true;productForm.querySelector('button[type="submit"]').textContent='✓ ပြင်ဆင်မှု သိမ်းရန်';productForm.scrollIntoView({behavior:'smooth',block:'start'});productName.focus()}
 productForm.onsubmit=event=>{event.preventDefault();if(!productForm.reportValidity())return;let button=productForm.querySelector('button[type="submit"]');masterWithSaving(button,async()=>{masterAssertOnline(['owner','admin']);let price=Number(productDefaultPrice.value),reorder=Number(productReorderLevel.value),whole=masterEl('productWholeUnits').checked;if(!Number.isSafeInteger(price)||price<0)throw new Error('ပုံသေတန်ဖိုးကို ကျပ်ပြည့်ဖြင့် ထည့်ပါ');if(!Number.isFinite(reorder)||reorder<0||Math.abs(reorder*1000-Math.round(reorder*1000))>.000001)throw new Error('Reorder Level ကို ဒဿမ ၃ လုံးအထိ ထည့်ပါ');if(whole&&!Number.isInteger(reorder))throw new Error('ကိန်းပြည့်ယူနစ် Product ၏ Reorder Level ကို ကိန်းပြည့်သာ ထည့်ပါ');let payload={name:productName.value.trim(),category:productCategory.value.trim(),unit_name:productUnit.value,whole_units_only:whole,default_unit_price_kyat:price,reorder_level:reorder,active:masterEl('productActive').checked,notes:productNote.value.trim()||null},query=masterEdit.product?supabaseClient.from('products').update(payload).eq('product_id',masterEdit.product):supabaseClient.from('products').insert(payload);let{error}=await query.select('product_id').single();if(error)throw error;resetProductMasterForm();await loadMasterData({quiet:true});toast.textContent='✓ ကုန်ပစ္စည်း Master ကို Server တွင် သိမ်းပြီး';showToast()})};
 productCatalogBody.onclick=event=>{let button=event.target.closest('[data-edit-product]');if(button)editProductMaster(button.dataset.editProduct)};cancelProduct.onclick=resetProductMasterForm;closeProductCatalog.onclick=()=>showView('goods-sales','sale');openProductCatalog=()=>{showView('farmers','products');productForm.scrollIntoView({behavior:'smooth',block:'start'})};addProductType.onclick=openProductCatalog;productUnit.onchange=()=>{if(productUnit.value==='ကီလို')masterEl('productWholeUnits').checked=false};
 
